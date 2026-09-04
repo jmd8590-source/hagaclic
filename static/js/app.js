@@ -31,25 +31,61 @@ function initAccessibility() {
   const isLargeFont = localStorage.getItem('hagaclic_font_large') === 'true';
   const isHighContrast = localStorage.getItem('hagaclic_high_contrast') === 'true';
 
-  if (isLargeFont) document.body.classList.add('font-large');
-  if (isHighContrast) document.body.classList.add('high-contrast');
-
   const btnFont = document.getElementById('btnToggleFont');
   const btnContrast = document.getElementById('btnToggleContrast');
 
+  function applyFontState(active) {
+    document.documentElement.classList.toggle('font-large', active);
+    document.body.classList.toggle('font-large', active);
+    if (btnFont) {
+      if (active) {
+        btnFont.innerHTML = '<span style="font-size: 1rem; font-weight: 800;">A-</span> <span>Letra Normal</span>';
+        btnFont.style.background = 'var(--accent)';
+        btnFont.style.borderColor = '#ffffff';
+      } else {
+        btnFont.innerHTML = '<span style="font-size: 1rem; font-weight: 800;">A+</span> <span>Letra Grande</span>';
+        btnFont.style.background = 'rgba(255, 255, 255, 0.15)';
+        btnFont.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      }
+    }
+  }
+
+  function applyContrastState(active) {
+    document.documentElement.classList.toggle('high-contrast', active);
+    document.body.classList.toggle('high-contrast', active);
+    if (btnContrast) {
+      if (active) {
+        btnContrast.style.background = '#000000';
+        btnContrast.style.color = '#ffffff';
+        btnContrast.style.borderColor = '#ffffff';
+      } else {
+        btnContrast.style.background = 'rgba(255, 255, 255, 0.15)';
+        btnContrast.style.color = '#ffffff';
+        btnContrast.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      }
+    }
+  }
+
+  if (isLargeFont) applyFontState(true);
+  if (isHighContrast) applyContrastState(true);
+
   if (btnFont) {
     btnFont.addEventListener('click', () => {
-      const active = document.body.classList.toggle('font-large');
-      localStorage.setItem('hagaclic_font_large', active);
-      showToast(active ? 'Tamaño de texto grande activado' : 'Tamaño de texto estándar');
+      const currentlyActive = document.body.classList.contains('font-large');
+      const newState = !currentlyActive;
+      applyFontState(newState);
+      localStorage.setItem('hagaclic_font_large', newState);
+      showToast(newState ? 'Tamaño de texto grande activado (A+)' : 'Tamaño de texto estándar restablecido');
     });
   }
 
   if (btnContrast) {
     btnContrast.addEventListener('click', () => {
-      const active = document.body.classList.toggle('high-contrast');
-      localStorage.setItem('hagaclic_high_contrast', active);
-      showToast(active ? 'Modo alto contraste activado' : 'Modo visual estándar');
+      const currentlyActive = document.body.classList.contains('high-contrast');
+      const newState = !currentlyActive;
+      applyContrastState(newState);
+      localStorage.setItem('hagaclic_high_contrast', newState);
+      showToast(newState ? 'Modo alto contraste activado' : 'Modo visual estándar restablecido');
     });
   }
 }

@@ -38,12 +38,74 @@
   --font-scale: 1;
 }
 
-/* Modo Accesible: Letra Grande */
+/* Modo Accesible: Letra Grande (Afecta directamente a html, body y todos los textos) */
+html.font-large {
+  --font-scale: 1.25;
+  font-size: 20px !important;
+}
+
+html.font-large body,
 body.font-large {
-  --font-scale: 1.2;
+  font-size: 20px !important;
+}
+
+body.font-large p,
+body.font-large span,
+body.font-large label,
+body.font-large li,
+body.font-large .meta-value,
+body.font-large .checklist-text,
+body.font-large .step-body p {
+  font-size: 1.15rem !important;
+  line-height: 1.65 !important;
+}
+
+body.font-large .hero-title {
+  font-size: 2.7rem !important;
+}
+
+body.font-large .hero-subtitle {
+  font-size: 1.35rem !important;
+}
+
+body.font-large .search-input {
+  font-size: 1.3rem !important;
+  padding: 1rem 0.75rem !important;
+}
+
+body.font-large .btn-search {
+  font-size: 1.25rem !important;
+  padding: 1rem 1.8rem !important;
+}
+
+body.font-large .tramite-card-title {
+  font-size: 1.5rem !important;
+}
+
+body.font-large .tramite-card-desc {
+  font-size: 1.15rem !important;
+}
+
+body.font-large .btn-card-primary,
+body.font-large .btn-action-primary,
+body.font-large .btn-action-secondary {
+  font-size: 1.15rem !important;
+  padding: 0.9rem 1.5rem !important;
+}
+
+body.font-large .step-number-circle {
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 1.3rem !important;
+}
+
+body.font-large .checklist-item input[type="checkbox"] {
+  width: 26px !important;
+  height: 26px !important;
 }
 
 /* Modo Accesible: Alto Contraste */
+html.high-contrast,
 body.high-contrast {
   --bg-page: #ffffff;
   --bg-card: #ffffff;
