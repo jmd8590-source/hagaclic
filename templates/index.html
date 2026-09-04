@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HagaClic - Asistente de Trámites Administrativos de España</title>
+  <meta name="description" content="Guías paso a paso sencillas, documentos necesarios, plazos legales y generador de cartas oficiales en PDF para trámites en España.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Barra Superior de Accesibilidad y Aviso -->
+  <header class="header-top">
+    <div class="header-top-content">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: rgba(255,255,255,0.2); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">ESPAÑA</span>
+        <span>Asistente ciudadano oficial y accesible para gestiones y papeleos</span>
+      </div>
+      <div class="accessibility-controls">
+        <button id="btnToggleFont" class="btn-access" title="Aumentar o reducir tamaño del texto">
+          <span style="font-size: 1rem; font-weight: 800;">A+</span>
+          <span>Letra Grande</span>
+        </button>
+        <button id="btnToggleContrast" class="btn-access" title="Activar modo de alto contraste para facilitar la lectura">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 0 1 0-16z"/></svg>
+          <span>Alto Contraste</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Navegación Principal -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="#" class="brand-link" onclick="switchView('catalog'); return false;">
+        <div class="logo-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="M9 15l2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>HagaClic</h1>
+          <span>Trámites claros, sin jerga ni pérdidas de tiempo</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <button class="nav-btn active" data-target="catalog">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Catálogo de Trámites</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-target="generator">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>Generador de Cartas PDF</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-target="saved">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            <span>Mis Trámites</span>
+            <span class="badge-count" id="savedCountBadge" style="display: none;">0</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Sección Hero con Buscador Principal -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-tagline">Orientación ciudadana directa</span>
+      <h2 class="hero-title">¿Qué trámite necesitas resolver hoy?</h2>
+      <p class="hero-subtitle">Escribe tu problema con tus propias palabras. Te decimos qué papeles necesitas, qué plazos tienes y te preparamos las cartas oficiales.</p>
+
+      <!-- Caja de Búsqueda -->
+      <div class="search-box-wrapper">
+        <span class="search-icon-decor">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </span>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Ej: tengo que renovar el DNI, darme de baja de la luz, el casero no me da la fianza..." 
+          aria-label="Buscar trámite en lenguaje natural"
+          autocomplete="off"
+        />
+        <button id="btnSearch" class="btn-search">
+          <span>Buscar Trámite</span>
+        </button>
+      </div>
+
+      <!-- Sugerencias Clicables Frecuentes -->
+      <div class="frequent-searches">
+        <span class="frequent-label">Ejemplos habituales:</span>
+        <button class="suggestion-pill" data-query="tengo que renovar el DNI">Renovar el DNI</button>
+        <button class="suggestion-pill" data-query="quiero darme de baja de la luz">Darse de baja de luz o teléfono</button>
+        <button class="suggestion-pill" data-query="el casero no me devuelve la fianza">Reclamar fianza al casero</button>
+        <button class="suggestion-pill" data-query="reclamar compra rota ante consumo">Compra defectuosa (Consumo)</button>
+        <button class="suggestion-pill" data-query="empadronarme piso">Empadronarse</button>
+        <button class="suggestion-pill" data-query="cita nie huellas">Cita Extranjería (NIE / TIE)</button>
+        <button class="suggestion-pill" data-query="cobrar el paro">Cobrar el paro (SEPE)</button>
+        <button class="suggestion-pill" data-query="cancelar gimnasio">Cancelar cuota de gimnasio</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Banner Informativo Legal Visible -->
+  <aside class="legal-banner">
+    <div class="legal-banner-content">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <div>
+        <strong>Aviso informativo para el ciudadano:</strong> HagaClic es una herramienta orientada a facilitar la comprensión de las gestiones en España. No constituye asesoramiento profesional o jurídico formal. La normativa y las tasas oficiales deben verificarse siempre en los portales oficiales de la Administración (sede.gob.es, boe.es).
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenedor Principal de la Aplicación -->
+  <main class="main-container">
+
+    <!-- 1. VISTA: CATÁLOGO DE TRÁMITES -->
+    <section id="viewCatalog">
+      <div class="catalog-header" id="catalogHeader">
+        <div>
+          <h3 class="catalog-title">Trámites y Gestiones Frecuentes</h3>
+          <p id="catalogCount" style="color: var(--text-muted); font-size: 0.9rem;">Cargando trámites...</p>
+        </div>
+
+        <!-- Filtros por categoría -->
+        <div class="filter-pills">
+          <button class="filter-btn active" data-cat="todas">Todos</button>
+          <button class="filter-btn" data-cat="Documentación y Ciudadanía">Documentación</button>
+          <button class="filter-btn" data-cat="Consumo y Suministros">Consumo y Suministros</button>
+          <button class="filter-btn" data-cat="Vivienda y Alquiler">Vivienda</button>
+          <button class="filter-btn" data-cat="Trabajo y Seguridad Social">Trabajo y SEPE</button>
+          <button class="filter-btn" data-cat="Extranjería e Inmigración">Extranjería</button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de tarjetas de trámites -->
+      <div class="tramites-grid" id="tramitesGrid">
+        <!-- Rellenado dinámicamente por JavaScript -->
+      </div>
+    </section>
+
+    <!-- 2. VISTA: DETALLE DEL TRÁMITE (FICHA PASO A PASO) -->
+    <section id="viewDetail" class="tramite-detail-view">
+      <!-- Rellenado dinámicamente al hacer clic en un trámite -->
+    </section>
+
+    <!-- 3. VISTA: GENERADOR DE CARTAS EN PDF -->
+    <section id="viewGenerator" class="generator-section" style="display: none;">
+      <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">
+          Generador de Cartas Oficiales en PDF
+        </h2>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+          Cumplimenta los datos y descarga al instante un escrito formal estructurado con fundamentación legal española, listo para imprimir, firmar y enviar por correo certificado o burofax.
+        </p>
+      </div>
+
+      <form id="letterForm">
+        <div class="form-grid">
+          
+          <!-- Selección de plantilla -->
+          <div class="form-group full-width">
+            <label for="templateType" class="form-label">Tipo de carta que deseas redactar:</label>
+            <select id="templateType" class="form-select" required>
+              <option value="baja_suministro">1. Baja de suministro o contrato (Luz, gas, internet, telefonía)</option>
+              <option value="reclamar_fianza">2. Solicitud de devolución de fianza al casero (Art. 36.4 LAU)</option>
+              <option value="reclamacion_empresa">3. Reclamación formal ante empresa (Producto defectuoso, gimnasio, servicio)</option>
+            </select>
+          </div>
+
+          <!-- Bloque: Datos del Solicitante -->
+          <div class="form-section-heading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Tus datos (Remitente / Solicitante)</span>
+          </div>
+
+          <div class="form-group">
+            <label for="solicitanteNombre" class="form-label">Nombre y apellidos completos: *</label>
+            <input type="text" id="solicitanteNombre" class="form-input" placeholder="Ej: María García López" required>
+          </div>
+
+          <div class="form-group">
+            <label for="solicitanteNif" class="form-label">DNI / NIE / Pasaporte: *</label>
+            <input type="text" id="solicitanteNif" class="form-input" placeholder="Ej: 12345678X" required>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="solicitanteDireccion" class="form-label">Tu dirección postal completa: *</label>
+            <input type="text" id="solicitanteDireccion" class="form-input" placeholder="Ej: Calle Gran Vía 24, 3º B, 28013 Madrid" required>
+          </div>
+
+          <div class="form-group">
+            <label for="solicitanteTelefono" class="form-label">Teléfono de contacto: *</label>
+            <input type="tel" id="solicitanteTelefono" class="form-input" placeholder="Ej: 612 345 678" required>
+          </div>
+
+          <div class="form-group">
+            <label for="solicitanteEmail" class="form-label">Correo electrónico: *</label>
+            <input type="email" id="solicitanteEmail" class="form-input" placeholder="Ej: tuemail@ejemplo.com" required>
+          </div>
+
+          <!-- Bloque: Datos del Destinatario -->
+          <div class="form-section-heading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            <span>Datos de la empresa, casero u organismo destinatario</span>
+          </div>
+
+          <div class="form-group">
+            <label for="destinatarioNombre" class="form-label">Nombre de la entidad o persona: *</label>
+            <input type="text" id="destinatarioNombre" class="form-input" placeholder="Ej: Telefónica de España S.A. / Juan Propietario" required>
+          </div>
+
+          <div class="form-group">
+            <label for="destinatarioCif" class="form-label">CIF o NIF del destinatario (opcional):</label>
+            <input type="text" id="destinatarioCif" class="form-input" placeholder="Ej: A-28015865">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="destinatarioDireccion" class="form-label">Domicilio social o departamento de atención:</label>
+            <input type="text" id="destinatarioDireccion" class="form-input" placeholder="Ej: Servicio de Atención al Cliente - Calle Mayor 1, Madrid" value="Servicio de Atención al Cliente">
+          </div>
+
+          <!-- Bloque: Datos específicos del trámite -->
+          <div class="form-section-heading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Detalles del caso</span>
+          </div>
+
+          <div class="form-group">
+            <label id="lblRefContrato" for="referenciaContrato" class="form-label">Nº de Contrato, Teléfono o CUPS:</label>
+            <input type="text" id="referenciaContrato" class="form-input" placeholder="Referencia identificativa">
+            <span id="hintRefContrato" class="form-hint">Aparece en tu factura o contrato.</span>
+          </div>
+
+          <div class="form-group">
+            <label id="lblFechaHecho" for="fechaHecho" class="form-label">Fecha del suceso (opcional):</label>
+            <input type="text" id="fechaHecho" class="form-input" placeholder="Ej: 15 de enero de 2025">
+          </div>
+
+          <div class="form-group" id="groupCuantia" style="display: none;">
+            <label id="lblCuantia" for="cuantia" class="form-label">Importe reclamado (€):</label>
+            <input type="text" id="cuantia" class="form-input" placeholder="Ej: 850">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="explicacionHechos" class="form-label">Breve descripción de los hechos o motivo:</label>
+            <textarea id="explicacionHechos" class="form-textarea" rows="4" placeholder="Indica de forma clara y directa los hechos ocurridos. Ej: Solicito la baja por cambio de domicilio tras cumplir el periodo mínimo pactado."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="ciudadFirma" class="form-label">Localidad donde firmas: *</label>
+            <input type="text" id="ciudadFirma" class="form-input" placeholder="Ej: Madrid, Valencia, Sevilla..." value="Madrid" required>
+          </div>
+
+        </div>
+
+        <div style="text-align: right; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+          <button type="submit" id="btnSubmitPdf" class="btn-action-primary" style="display: inline-flex; width: auto; font-size: 1.1rem; padding: 0.9rem 2rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Descargar Carta Formal en PDF</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 4. VISTA: MIS TRÁMITES (GESTOR LOCAL) -->
+    <section id="viewSaved" class="saved-section" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">Mis Trámites Guardados</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Lleva el seguimiento de los trámites que tienes en curso. Los datos se guardan de forma privada en tu navegador (sin necesidad de crear cuentas).
+          </p>
+        </div>
+        <button class="btn-back" onclick="switchView('catalog')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Añadir otro trámite</span>
+        </button>
+      </div>
+
+      <!-- Lista de trámites guardados -->
+      <div class="saved-list" id="savedListContainer">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pie de Página -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>HagaClic - Asistente de Trámites</h3>
+        <p style="max-width: 450px; line-height: 1.6;">
+          Una iniciativa ciudadana para hacer comprensible la administración pública española. Diseñada pensando en la máxima accesibilidad para todas las edades.
+        </p>
+      </div>
+
+      <div>
+        <h4 style="color: #ffffff; margin-bottom: 0.75rem; font-size: 1rem;">Enlaces y Fuentes Oficiales</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem;">
+          <li><a href="https://sede.gob.es" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: none;">• Sede Electrónica del Estado (sede.gob.es)</a></li>
+          <li><a href="https://www.boe.es" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: none;">• Boletín Oficial del Estado (BOE)</a></li>
+          <li><a href="https://www.citapreviadnie.es" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: none;">• Cita Previa DNI y Pasaporte</a></li>
+          <li><a href="https://sede.sepe.gob.es" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: none;">• Sede Electrónica del SEPE</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© HagaClic España. Guía informativa para el ciudadano. Libre de publicidad y registros.</p>
+      <p>Todas las fichas han sido contrastadas con la normativa legal vigente (2025).</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

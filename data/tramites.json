@@ -1,0 +1,434 @@
+[
+  {
+    "id": "renovar-dni",
+    "titulo": "Renovar el Documento Nacional de Identidad (DNI)",
+    "categoria": "Documentación y Ciudadanía",
+    "icono": "id-card",
+    "resumen": "Cómo renovar tu DNI por caducidad, pérdida, robo o cambio de domicilio de manera rápida y sin complicaciones.",
+    "coste": "12,00 € (en efectivo el día de la cita o pago telemático previo). Gratuito por cambio de domicilio/filiación o familia numerosa.",
+    "plazo": "Se puede renovar dentro de los últimos 180 días de vigencia (6 meses antes de que caduque).",
+    "donde": "Presencialmente en comisarías u oficinas de expedición de la Policía Nacional con cita previa obligatoria. La cita se solicita por internet o teléfono.",
+    "fuente_oficial": "Cuerpo Nacional de Policía - Ministerio del Interior (citapreviadnie.es)",
+    "fecha_verificacion": "Enero 2025 (Normativa según Ley Orgánica 4/2015 y RD 1553/2005)",
+    "enlace_oficial": "https://www.citapreviadnie.es",
+    "enlace_texto": "Sede Oficial Cita Previa DNI (Policía Nacional)",
+    "plantilla_carta": null,
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Solicitar cita previa oficial",
+        "descripcion": "Accede a la web oficial citapreviadnie.es o llama al teléfono gratuito 060. Puedes pedir cita hasta 180 días antes de que caduque tu documento actual."
+      },
+      {
+        "numero": 2,
+        "titulo": "Reunir la documentación necesaria",
+        "descripcion": "Consigue una fotografía reciente tamaño carnet. Si te has mudado recientemente, pide el volante de empadronamiento en tu ayuntamiento antes de acudir."
+      },
+      {
+        "numero": 3,
+        "titulo": "Acudir a la oficina de expedición",
+        "descripcion": "Llega con 5-10 minutos de antelación a la comisaría seleccionada con tu DNI anterior y los documentos preparados."
+      },
+      {
+        "numero": 4,
+        "titulo": "Abonar la tasa y registrar las huellas",
+        "descripcion": "Paga los 12,00 € exactos en efectivo (salvo que ya lo hayas pagado con tarjeta al pedir la cita por internet o tengas exención demostrada de familia numerosa)."
+      },
+      {
+        "numero": 5,
+        "titulo": "Recogida inmediata y clave electrónica",
+        "descripcion": "Te entregan el DNI en el mismo acto. En los terminales de la oficina puedes establecer el PIN de tu certificado digital para trámites por internet."
+      }
+    ],
+    "documentos": [
+      "1 fotografía reciente en color (32x26 mm), fondo blanco, lisa y de frente, sin gafas oscuras ni prendas que oculten el óvalo facial.",
+      "DNI anterior (imprescindible entregarlo). Si lo perdiste o te lo robaron, denuncia policial previa o comunicación en la misma oficina.",
+      "Si cambiaste de domicilio: Certificado o volante de empadronamiento de tu ayuntamiento con antigüedad inferior a 3 meses.",
+      "Si cambian tus datos personales: Certificado literal de nacimiento expedido por el Registro Civil con antigüedad máxima de 6 meses.",
+      "Si eres familia numerosa: Título oficial o carnet de familia numerosa en vigor para obtener la exención total de los 12 €."
+    ],
+    "consejos": [
+      "No esperes a que caduque: puedes pedir cita con hasta 6 meses de anticipación.",
+      "Lleva el importe exacto de 12 € en monedas y billetes pequeños, los funcionarios no siempre disponen de cambio.",
+      "Si necesitas viajar de urgencia y no hay citas disponibles, acude a primera hora de la mañana a una comisaría con tu billete de viaje justificado."
+    ],
+    "palabras_clave": [
+      "dni", "renovar dni", "carnet identidad", "dni caducado", "perdida dni", "robo dni",
+      "policia", "060", "foto carnet", "tasas dni", "tasa 12 euros", "cita previa dni", "comisaria"
+    ]
+  },
+  {
+    "id": "baja-suministro",
+    "titulo": "Darse de baja de una compañía de luz, gas o teléfono",
+    "categoria": "Consumo y Suministros",
+    "icono": "plug-x",
+    "resumen": "Cancela tu contrato de telefonía, fibra, luz o gas sin trabas, penalizaciones abusivas ni cobros después de irte.",
+    "coste": "Gratuito. La ley prohíbe cobrar por tramitar una baja. Solo pueden cobrarte penalización si firmaste permanencia legal y solo de forma proporcional a los meses restantes.",
+    "plazo": "Telecomunicaciones: máximo 2 días hábiles tras recibir la solicitud. Energía: se liquida en el siguiente ciclo o con lectura final.",
+    "donde": "Por el mismo canal en el que contrataste (teléfono/web) o formalmente mediante escrito fehaciente (recomendado burofax o carta certificada).",
+    "fuente_oficial": "Real Decreto 899/2009 (Carta derechos teleco) y Real Decreto Legislativo 1/2007 (TRLGDCU art. 68)",
+    "fecha_verificacion": "Enero 2025 (Conforme al art. 68 TRLGDCU y art. 7 RD 899/2009)",
+    "enlace_oficial": "https://usuariosteleco.mineco.gob.es/",
+    "enlace_texto": "Oficina de Atención al Usuario de Telecomunicaciones (Gobierno de España)",
+    "plantilla_carta": "baja_suministro",
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Comprobar si existe permanencia y equipos prestados",
+        "descripcion": "Revisa tu última factura o llama a la compañía para comprobar si tienes permanencia activa o aparatos en régimen de cesión (router de fibra, decodificador TV)."
+      },
+      {
+        "numero": 2,
+        "titulo": "Generar y enviar la carta formal de baja",
+        "descripcion": "Usa nuestro generador para crear la carta oficial con tus datos, número de contrato/CUPS y fecha. Envíala por correo certificado con acuse, burofax o a través de su canal de bajas exigiendo número de referencia."
+      },
+      {
+        "numero": 3,
+        "titulo": "Devolver los equipos y exigir comprobante",
+        "descripcion": "Dispones habitualmente de 15 a 30 días para devolver el router o aparatos en una tienda autorizada o mediante mensajero. Guarda siempre el justificante firmado de entrega."
+      },
+      {
+        "numero": 4,
+        "titulo": "Revisar la factura final",
+        "descripcion": "Comprueba que en la última factura no te cobren días posteriores al plazo legal de baja (2 días hábiles) ni conceptos inventados. Si intentan cobrar indebidamente, puedes ordenar la devolución bancaria aportando la carta de baja."
+      }
+    ],
+    "documentos": [
+      "DNI o NIE del titular del contrato.",
+      "Última factura donde figure el número de contrato, código CUPS (en luz/gas) o número telefónico de la línea.",
+      "Carta formal de solicitud de baja con acuse de recibo generada en HagaClic.",
+      "Justificante de entrega y devolución de equipos (routers, decodificadores) sellado por la tienda o transportista."
+    ],
+    "consejos": [
+      "Tienes derecho por ley a darte de baja por el mismo medio por el que te diste de alta (por ejemplo, si te diste de alta por teléfono, deben admitir la baja por teléfono, aunque recomendamos por escrito para que quede constancia).",
+      "Apunta siempre el nombre del operador, la fecha, la hora exacta y el número de expediente de la solicitud de baja.",
+      "No bloquees la domiciliación bancaria antes de tiempo: primero solicita la baja formalmente y comprueba la factura final para evitar que te incluyan en ficheros de morosos."
+    ],
+    "palabras_clave": [
+      "baja luz", "baja telefono", "cancelar movistar", "cancelar vodafone", "cancelar orange",
+      "baja gas", "dar de baja fibra", "router", "iberdrola", "endesa", "naturgy", "permanencia", "recibo luz"
+    ]
+  },
+  {
+    "id": "reclamar-fianza-casero",
+    "titulo": "Reclamar la fianza del alquiler al casero o arrendador",
+    "categoria": "Vivienda y Alquiler",
+    "icono": "home",
+    "resumen": "Exige la devolución de tu dinero de fianza tras dejar el piso en regla una vez transcurrido el mes que marca la ley.",
+    "coste": "Gratuito. La reclamación previa no tiene coste judicial. Si acudes al juzgado hasta 2.000 €, el juicio verbal no requiere abogado ni procurador.",
+    "plazo": "El propietario tiene exactamente 1 mes natural desde la entrega de llaves. Desde el día 31 devenga intereses de demora automáticos.",
+    "donde": "Requerimiento previo por escrito (burofax o carta con acuse) y, si no paga, Juzgado de Primera Instancia de la localidad del inmueble.",
+    "fuente_oficial": "Ley 29/1994 de Arrendamientos Urbanos (LAU), artículo 36.4",
+    "fecha_verificacion": "Febrero 2025 (Artículo 36.4 de la LAU y criterios del Tribunal Supremo)",
+    "enlace_oficial": "https://www.mivau.gob.es/",
+    "enlace_texto": "Ministerio de Vivienda y Agenda Urbana",
+    "plantilla_carta": "reclamar_fianza",
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Firmar la entrega de llaves y estado del inmueble",
+        "descripcion": "El día que dejas la vivienda, firma junto al arrendador un documento de resolución donde conste la entrega de llaves, lecturas de contadores y que el piso se deja en buen estado."
+      },
+      {
+        "numero": 2,
+        "titulo": "Dejar transcurrir el mes natural legal",
+        "descripcion": "La ley concede al propietario 30 días para comprobar consumos pendientes y revisar el inmueble. Durante este tiempo no puedes exigir legalmente intereses."
+      },
+      {
+        "numero": 3,
+        "titulo": "Enviar requerimiento formal con apercibimiento legal",
+        "descripcion": "Pasado el mes sin cobrar o ante descuentos sin factura profesional, genera en HagaClic la carta oficial de reclamación previa y envíala dándole un plazo de 7 a 10 días."
+      },
+      {
+        "numero": 4,
+        "titulo": "Demanda de Juicio Verbal en el Juzgado (sin abogado)",
+        "descripcion": "Si no abona la fianza, acude al decanato de los juzgados y presenta el formulario oficial de demanda de Juicio Verbal por reclamación de cantidad (totalmente gratuito para cantidades de hasta 2.000 €)."
+      }
+    ],
+    "documentos": [
+      "Copia del contrato de alquiler firmado.",
+      "Documento de resolución de contrato y entrega de llaves firmado por ambas partes.",
+      "Fotografías o vídeos del estado de la vivienda tomadas el día en que entregaste las llaves.",
+      "Últimos recibos pagados de suministros y renta que demuestren que estás al corriente de pago.",
+      "Carta de requerimiento fehaciente generada con HagaClic con resguardo de envío.",
+      "En caso de que alegue desperfectos: exigir que aporte facturas reales (los presupuestos no sirven por sí solos ante un juez)."
+    ],
+    "consejos": [
+      "El casero no puede descontar nada por el 'desgaste por uso ordinario' del piso (como marcas en paredes o pintura antigua). Solo puede descontar roturas atribuibles a negligencia.",
+      "Cualquier descuento que pretenda hacer debe estar respaldado por facturas oficiales con IVA emitidas por profesionales, nunca presupuestos o cálculos arbitrarios.",
+      "A partir de los 30 días de la entrega de llaves, la cantidad devengará el interés legal del dinero fijado por los Presupuestos Generales del Estado."
+    ],
+    "palabras_clave": [
+      "fianza casero", "devolver fianza", "fianza alquiler", "arrendador", "entrega llaves",
+      "lau 36", "piso alquiler", "fianza no devuelta", "casero no paga", "retener fianza", "reclamar fianza"
+    ]
+  },
+  {
+    "id": "reclamar-compra-consumo",
+    "titulo": "Reclamar una compra defectuosa o servicio ante Consumo",
+    "categoria": "Consumo y Suministros",
+    "icono": "shopping-bag",
+    "resumen": "Cómo hacer valer tu garantía de 3 años, exigir el reembolso o recurrir a los organismos oficiales si la tienda no responde.",
+    "coste": "100% gratuito tanto la reclamación ante la empresa como la mediación en la OMIC y el Arbitraje de Consumo.",
+    "plazo": "Garantía legal de 3 años para productos nuevos (2 años para productos comprados antes de 2022). La empresa debe contestar reclamaciones en máximo 1 mes.",
+    "donde": "Primero reclamación formal por escrito a la empresa vendedora. Si no resuelven, en la OMIC (Oficina Municipal de Información al Consumidor) de tu ayuntamiento.",
+    "fuente_oficial": "Real Decreto Legislativo 1/2007 (TRLGDCU) y Sistema Arbitral de Consumo",
+    "fecha_verificacion": "Enero 2025 (Garantía legal de 3 años y presunción de falta de conformidad de 2 años)",
+    "enlace_oficial": "https://www.consumo.gob.es/",
+    "enlace_texto": "Ministerio de Derechos Sociales, Consumo y Agenda 2030",
+    "plantilla_carta": "reclamacion_empresa",
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Reclamación previa por escrito a la tienda o fabricante",
+        "descripcion": "Genera la carta formal en HagaClic indicando la fecha de compra, el fallo del producto y solicitando expresamente la reparación, sustitución o devolución del dinero."
+      },
+      {
+        "numero": 2,
+        "titulo": "Plazo de respuesta obligatorio de 30 días",
+        "descripcion": "Por ley, el servicio de atención al cliente de la empresa tiene la obligación de contestar a tu reclamación en un plazo máximo de 1 mes natural."
+      },
+      {
+        "numero": 3,
+        "titulo": "Pedir la Hoja Oficial de Reclamaciones o acudir a la OMIC",
+        "descripcion": "Si no contestan o rechazan la solución justa, presenta una reclamación oficial en la OMIC de tu municipio adjuntando la carta previa y el ticket de compra."
+      },
+      {
+        "numero": 4,
+        "titulo": "Arbitraje de Consumo",
+        "descripcion": "Solicita que el caso sea resuelto por la Junta Arbitral de Consumo. Es un procedimiento rápido, gratuito y su dictamen (laudo) tiene la misma fuerza obligatoria que una sentencia judicial."
+      }
+    ],
+    "documentos": [
+      "Factura, ticket de compra o resguardo del cargo bancario de la compra.",
+      "Fotografías o vídeos que demuestren el defecto, avería o falta de conformidad.",
+      "Copia de la carta formal de reclamación previa generada en HagaClic y acuse de envío.",
+      "Copia de las respuestas de la tienda (si las hubiera) o justificante del silencio tras 30 días."
+    ],
+    "consejos": [
+      "Durante los dos primeros años desde la compra, se presume legalmente que el defecto ya venía de fábrica y es el vendedor quien debe demostrar lo contrario (no tú).",
+      "No aceptes que te remitan obligatoriamente al fabricante si compraste en tienda: como consumidor tienes derecho a que responda el vendedor directo.",
+      "La garantía no cubre daños por golpes accidentales, pero sí cualquier defecto de funcionamiento o pieza defectuosa."
+    ],
+    "palabras_clave": [
+      "compra defectuosa", "producto roto", "garantia 3 anos", "garantia", "devolucion dinero",
+      "omic", "reclamar tienda", "consumo", "arbitraje consumo", "aparato averiado", "reclamacion comercio"
+    ]
+  },
+  {
+    "id": "empadronarse",
+    "titulo": "Empadronarse en tu municipio (Alta en el Padrón Municipal)",
+    "categoria": "Documentación y Ciudadanía",
+    "icono": "map-pin",
+    "resumen": "El trámite indispensable para acreditar tu domicilio legal, tener médico de cabecera asignado, votar y escolarizar a tus hijos.",
+    "coste": "Totalmente gratuito.",
+    "plazo": "Obligatorio hacerlo al cambiar de residencia habitual. El volante se entrega en el mismo día presencialmente, o en 3-7 días hábiles si lo pides por internet.",
+    "donde": "En el Ayuntamiento donde resides (Oficina de Atención Ciudadana) de forma presencial o por la sede electrónica municipal si tienes Cl@ve o certificado digital.",
+    "fuente_oficial": "Ley 7/1985 de Bases del Régimen Local (artículos 15 al 18) e Instituto Nacional de Estadística (INE)",
+    "fecha_verificacion": "Enero 2025 (Normativa estatal de régimen local)",
+    "enlace_oficial": "https://sede.gob.es",
+    "enlace_texto": "Directorio de Sedes Electrónicas Municipales (Sede.gob.es)",
+    "plantilla_carta": null,
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Pedir cita previa en tu ayuntamiento",
+        "descripcion": "Accede a la página web de tu ayuntamiento o llama a atención al ciudadano (010 en grandes ciudades) para pedir cita de Padrón de Habitantes."
+      },
+      {
+        "numero": 2,
+        "titulo": "Cumplimentar la hoja padronal",
+        "descripcion": "Descarga o rellena el impreso oficial de inscripción padronal con los datos de todas las personas que van a vivir en el domicilio y sus firmas."
+      },
+      {
+        "numero": 3,
+        "titulo": "Aportar el justificante de la vivienda",
+        "descripcion": "Si eres propietario, lleva las escrituras o el último IBI. Si eres inquilino, lleva tu contrato de alquiler y el último recibo del mes pagado."
+      },
+      {
+        "numero": 4,
+        "titulo": "Obtención del volante o certificado",
+        "descripcion": "El funcionario registrará el alta y te entregará el volante de empadronamiento oficial que certifica tu residencia."
+      }
+    ],
+    "documentos": [
+      "Hoja padronal del ayuntamiento debidamente cumplimentada y firmada por todos los mayores de edad que se inscriben.",
+      "Documento original de identidad en vigor de todos los miembros: DNI, NIE o Pasaporte. Para menores de edad: Libro de Familia o certificado de nacimiento.",
+      "Si la vivienda es de tu propiedad: Escritura de propiedad, nota simple del Registro (<3 meses) o último recibo del IBI.",
+      "Si estás de alquiler: Contrato de arrendamiento en vigor a tu nombre (+ último recibo del alquiler o de suministro pagado).",
+      "Si la vivienda no está a tu nombre o vives en casa de otra persona: Autorización por escrito de la persona empadronada titular + copia de su documento de identidad."
+    ],
+    "consejos": [
+      "El empadronamiento es un derecho y una obligación legal de todos los vecinos, con independencia de su situación administrativa o laboral.",
+      "Pide varios volantes de empadronamiento el mismo día, ya que los necesitarás para el centro de salud, trámites del DNI y ayudas públicas.",
+      "Recuerda que los certificados tienen generalmente una validez oficial de 3 meses desde su expedición."
+    ],
+    "palabras_clave": [
+      "empadronarse", "padron", "volante padron", "certificado empadronamiento", "ayuntamiento",
+      "alta padron", "cambio domicilio", "residencia", "medico cabecera", "oac", "inscripcion municipal"
+    ]
+  },
+  {
+    "id": "cita-previa-extranjeria",
+    "titulo": "Solicitar cita previa en Extranjería",
+    "categoria": "Extranjería e Inmigración",
+    "icono": "globe",
+    "resumen": "Pasos oficiales para conseguir tu cita de toma de huellas (TIE), recogida de tarjeta o trámites de residencia de forma gratuita.",
+    "coste": "La cita previa es 100% gratuita por ley. No pagues a intermediarios. (La tarjeta TIE física conlleva una tasa posterior modelo 790-012 de 16 a 22 € aprox.).",
+    "plazo": "Las citas se ofertan periódicamente en el portal del Estado (habitualmente en horarios de mañana según la provincia).",
+    "donde": "Exclusivamente por internet a través de la Sede Electrónica de Administraciones Públicas (portal oficial icpplus del Ministerio).",
+    "fuente_oficial": "Ministerio de Política Territorial y Memoria Democrática - Secretaría de Estado de Función Pública",
+    "fecha_verificacion": "Enero 2025 (Portal oficial sede.administracionespublicas.gob.es)",
+    "enlace_oficial": "https://sede.administracionespublicas.gob.es/icpplus/index.html",
+    "enlace_texto": "Portal Oficial Cita Previa Extranjería (icpplus)",
+    "plantilla_carta": null,
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Acceder a la sede electrónica icpplus",
+        "descripcion": "Entra en el enlace oficial de la Sede Administraciones Públicas. Es el único sitio web legal y oficial del Estado."
+      },
+      {
+        "numero": 2,
+        "titulo": "Seleccionar tu provincia y trámite",
+        "descripcion": "Elige la provincia donde resides. En el desplegable de trámites de la Policía, selecciona por ejemplo: 'POLICIA - TOMA DE HUELLA (EXPEDICIÓN DE TARJETA)'."
+      },
+      {
+        "numero": 3,
+        "titulo": "Introducir tus datos personales exactos",
+        "descripcion": "Escribe tu NIE o Pasaporte, nombre y apellidos exactamente como figuran en tu documento oficial, fecha de nacimiento y país de nacionalidad."
+      },
+      {
+        "numero": 4,
+        "titulo": "Seleccionar fecha y confirmar por SMS",
+        "descripcion": "Elige entre los días y horas disponibles. El sistema te enviará un código de verificación por SMS al teléfono que debes introducir para confirmar."
+      },
+      {
+        "numero": 5,
+        "titulo": "Guardar e imprimir el resguardo justificativo",
+        "descripcion": "Descarga el justificante con el número de cita y la dirección de la oficina a la que deberás acudir el día asignado."
+      }
+    ],
+    "documentos": [
+      "Pasaporte original en vigor y copia completa de todas sus hojas.",
+      "Para toma de huellas (TIE): Resolución favorable de concesión de autorización de residencia o estancia.",
+      "1 fotografía reciente tipo carnet (fondo blanco, de frente, sin prendas que cubran el rostro).",
+      "Justificante de pago de la tasa oficial modelo 790 código 012 abonada en el banco.",
+      "Volante de empadronamiento actualizado si has cambiado de domicilio respecto a la solicitud inicial (<3 meses)."
+    ],
+    "consejos": [
+      "AVISO DE SEGURIDAD: La venta de citas previas es ilegal. El Ministerio y la Policía Nacional nunca cobran por dar una cita.",
+      "Si no hay citas disponibles, las provincias suelen habilitar nuevos cupos en horarios matinales específicos (habitualmente los viernes o a primera hora de la mañana).",
+      "Asegúrate de llevar el resguardo de la cita impreso o en el móvil el día de la cita policial."
+    ],
+    "palabras_clave": [
+      "cita extranjeria", "cita nie", "huellas tie", "toma huellas", "tarjeta residencia",
+      "papeles extranjeria", "icpplus", "renovar tie", "recogida nie", "policia extranjeria", "cita gratis"
+    ]
+  },
+  {
+    "id": "prestacion-desempleo-sepe",
+    "titulo": "Solicitar prestación por desempleo (Paro o subsidio SEPE)",
+    "categoria": "Trabajo y Seguridad Social",
+    "icono": "briefcase",
+    "resumen": "Cómo solicitar el paro contributivo o el subsidio por desempleo tras finalizar tu contrato o sufrir un despido.",
+    "coste": "100% gratuito.",
+    "plazo": "15 días hábiles obligatorios a contar desde el día siguiente a la situación legal de desempleo o al fin de las vacaciones retribuidas pendientes.",
+    "donde": "En la Sede Electrónica del SEPE (con Cl@ve, DNIe o certificado) o presencialmente en tu oficina del SEPE con cita previa.",
+    "fuente_oficial": "Servicio Público de Empleo Estatal (SEPE) / Ley General de la Seguridad Social",
+    "fecha_verificacion": "Febrero 2025 (Conforme al Real Decreto-ley 2/2024 de modernización del subsidio de desempleo)",
+    "enlace_oficial": "https://sede.sepe.gob.es/",
+    "enlace_texto": "Sede Electrónica del SEPE",
+    "plantilla_carta": null,
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Inscribirte como demandante de empleo (DARDE)",
+        "descripcion": "Antes de acudir al SEPE, debes apuntarte obligatoriamente al paro en el servicio de empleo de tu comunidad autónoma y obtener la tarjeta del paro (DARDE)."
+      },
+      {
+        "numero": 2,
+        "titulo": "Verificar el Certificado de Empresa",
+        "descripcion": "Tu antigua empresa tiene la obligación legal de enviar tu certificado de empresa al SEPE telemáticamente. Puedes comprobar en la sede electrónica si ya lo han cargado."
+      },
+      {
+        "numero": 3,
+        "titulo": "Presentar la solicitud dentro de los 15 días hábiles",
+        "descripcion": "Haz la solicitud por la sede electrónica con Cl@ve o pide cita previa en el SEPE dentro del plazo estricto de 15 días laborables para no perder días de cobro."
+      },
+      {
+        "numero": 4,
+        "titulo": "Cobro mensual de la prestación",
+        "descripcion": "Una vez aprobada, el SEPE abona la prestación en tu cuenta corriente bancaria habitualmente a partir del día 10 de cada mes natural."
+      }
+    ],
+    "documentos": [
+      "Documento de identidad en vigor (DNI, NIE o pasaporte).",
+      "Tarjeta de demanda de empleo activa emitida por tu comunidad autónoma (DARDE).",
+      "Número de cuenta bancaria (IBAN) en la que seas titular obligatorio.",
+      "Libro de Familia o partidas de nacimiento si solicitas reconocimiento de hijos a cargo.",
+      "Si la empresa no envió el certificado telemático: Certificado de empresa en papel firmado y sellado."
+    ],
+    "consejos": [
+      "¡Ojo con los plazos! Los 15 días hábiles no incluyen sábados, domingos ni festivos.",
+      "Si te correspondían vacaciones no disfrutadas que te pagaron en el finiquito, el plazo de 15 días empieza a contar al día siguiente de que terminen esas vacaciones.",
+      "Para tener derecho a la prestación contributiva (el paro) necesitas tener cotizados al menos 360 días en los últimos 6 años."
+    ],
+    "palabras_clave": [
+      "paro", "cobrar el paro", "desempleo", "sepe", "inem", "subsidio", "despido",
+      "finiquito", "darde", "15 dias paro", "prestacion", "cotizaciones", "seguridad social"
+    ]
+  },
+  {
+    "id": "cancelar-gimnasio",
+    "titulo": "Cancelar un contrato de gimnasio o suscripción deportiva",
+    "categoria": "Consumo y Suministros",
+    "icono": "activity",
+    "resumen": "Date de baja de tu gimnasio cumpliendo el preaviso para evitar que te sigan cobrando cuotas de forma automática.",
+    "coste": "Gratuito. No es legal cobrar indemnizaciones abusivas por cancelar si avisas con el plazo previsto.",
+    "plazo": "Preaviso estipulado en tu contrato (habitualmente entre 15 y 30 días antes del inicio del siguiente ciclo mensual de cobro).",
+    "donde": "Presencialmente en la recepción del centro pidiendo copia firmada y sellada, o por escrito fehaciente (email certificado o burofax).",
+    "fuente_oficial": "Real Decreto Legislativo 1/2007 (TRLGDCU) arts. 62 y 86 sobre cláusulas abusivas",
+    "fecha_verificacion": "Enero 2025 (Artículos 62 y 86 del TRLGDCU)",
+    "enlace_oficial": "https://www.consumo.gob.es/",
+    "enlace_texto": "Portal de Consumo del Gobierno de España",
+    "plantilla_carta": "reclamacion_empresa",
+    "pasos": [
+      {
+        "numero": 1,
+        "titulo": "Localizar las condiciones de contratación",
+        "descripcion": "Revisa el contrato o la app del gimnasio para comprobar con cuántos días de preaviso debes solicitar la no renovación de la cuota (lo habitual son 15 o 30 días)."
+      },
+      {
+        "numero": 2,
+        "titulo": "Generar la carta de baja formal",
+        "descripcion": "Utiliza nuestro generador de cartas para emitir el escrito formal de baja y revocación de la orden de domiciliación bancaria."
+      },
+      {
+        "numero": 3,
+        "titulo": "Entregar y exigir resguardo sellado",
+        "descripcion": "Lleva dos copias de la carta a la recepción del gimnasio: una se la quedan ellos y la otra te la firman y sellan con la fecha del día. Si es un gimnasio online, envíala por correo con acuse."
+      },
+      {
+        "numero": 4,
+        "titulo": "Devolución bancaria si cobran indebidamente",
+        "descripcion": "Si tras cumplir el preaviso te pasan un nuevo cargo al banco, puedes ordenar a tu banco la devolución inmediata del recibo presentando tu justificante sellado de baja."
+      }
+    ],
+    "documentos": [
+      "Documento de identidad (DNI o NIE) del titular de la suscripción.",
+      "Número de socio o número de contrato del centro deportivo.",
+      "Carta formal de baja y revocación de cobros bancarios generada en HagaClic.",
+      "Copia sellada con fecha de recepción por el personal del gimnasio."
+    ],
+    "consejos": [
+      "Nunca te limites a 'devolver el recibo' en el banco sin haber pedido antes la baja por escrito: el gimnasio podría reclamarte la deuda e incluirte en ficheros de impagos.",
+      "Las cláusulas de permanencia anual con renovación automática sin preaviso son nulas de pleno derecho según la jurisprudencia de consumo.",
+      "Guarda la copia sellada al menos durante 1 año como resguardo ante posibles reclamaciones de empresas de cobro."
+    ],
+    "palabras_clave": [
+      "baja gimnasio", "cancelar gimnasio", "gym", "cuota gimnasio", "renovacion automatica",
+      "devolver recibo gimnasio", "subscripcion fitness", "permanencia gym", "clausulas abusivas"
+    ]
+  }
+]
