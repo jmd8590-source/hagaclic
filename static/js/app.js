@@ -120,15 +120,13 @@ function initSearchAndFilters() {
 
   btnSearch.addEventListener('click', (e) => {
     e.preventDefault();
-    AppState.searchQuery = searchInput.value.trim();
-    performSearch();
+    executeSearchAndScroll();
   });
 
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      AppState.searchQuery = searchInput.value.trim();
-      performSearch();
+      executeSearchAndScroll();
     }
   });
 
@@ -139,8 +137,7 @@ function initSearchAndFilters() {
       searchInput.value = query;
       AppState.searchQuery = query;
       switchView('catalog');
-      performSearch();
-      window.scrollTo({ top: document.getElementById('catalogHeader').offsetTop - 80, behavior: 'smooth' });
+      performSearch(true);
     });
   });
 
@@ -150,8 +147,29 @@ function initSearchAndFilters() {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       AppState.currentCategory = btn.getAttribute('data-cat');
-      performSearch();
+      performSearch(false);
     });
+  });
+}
+
+function executeSearchAndScroll() {
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  
+  AppState.searchQuery = searchInput.value.trim();
+  switchView('catalog');
+
+  // Feedback visual inmediato en el botón
+  const originalBtnContent = btnSearch.innerHTML;
+  btnSearch.innerHTML = `
+    <svg class="spin-animation" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.9"></path></svg>
+    <span>Buscando...</span>
+  `;
+  btnSearch.disabled = true;
+
+  performSearch(true, () => {
+    btnSearch.innerHTML = originalBtnContent;
+    btnSearch.disabled = false;
   });
 }
 
@@ -168,16 +186,31 @@ function loadInitialTramites() {
     });
 }
 
-function performSearch() {
+function performSearch(shouldScroll = false, callback = null) {
   const url = `/api/tramites?q=${encodeURIComponent(AppState.searchQuery)}&categoria=${encodeURIComponent(AppState.currentCategory)}`;
   
   fetch(url)
     .then(res => res.json())
     .then(data => {
+      // Si la búsqueda devolvió resultados o asistencia, renderizar
       renderTramitesGrid(data.tramites, data.orientacion_asistida);
+
+      // Si el usuario pulsó buscar o una sugerencia, desplazarse suavemente a los resultados
+      if (shouldScroll) {
+        const headerElem = document.getElementById('catalogHeader');
+        if (headerElem) {
+          const yOffset = -75;
+          const y = headerElem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }
     })
     .catch(err => {
       console.error('Error en búsqueda:', err);
+      showToast('Error al realizar la búsqueda');
+    })
+    .finally(() => {
+      if (callback) callback();
     });
 }
 
@@ -185,11 +218,14 @@ function renderTramitesGrid(tramites, orientacionAsistida) {
   const grid = document.getElementById('tramitesGrid');
   const countLabel = document.getElementById('catalogCount');
 
-  // Si no hay trámites cerrados en el catálogo pero tenemos orientación oficial asistida
-  if ((!tramites || tramites.length === 0) && orientacionAsistida) {
-    countLabel.textContent = 'Orientación oficial asistida encontrada';
-    renderAssistedGuidance(orientacionAsistida, grid);
-    return;
+  // Si tenemos orientación oficial asistida (por ejemplo: fallecimiento/herencia, DGT, Hacienda, becas, etc.)
+  // o si no hay trámites del catálogo, mostramos DIRECTAMENTE la guía oficial completa en pantalla:
+  if (orientacionAsistida && AppState.searchQuery && AppState.searchQuery.trim().length >= 3) {
+    if (orientacionAsistida.tipo !== 'instancia-general-ciudadana' || !tramites || tramites.length === 0) {
+      countLabel.textContent = 'Orientación oficial asistida para tu gestión';
+      renderAssistedGuidance(orientacionAsistida, grid);
+      return;
+    }
   }
 
   // Si no hay absolutamente nada
