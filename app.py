@@ -4,6 +4,7 @@ import re
 import unicodedata
 from flask import Flask, render_template, request, jsonify, send_file
 from pdf_generator import build_pdf_buffer
+import orientacion_service
 
 app = Flask(__name__)
 
@@ -187,12 +188,30 @@ def api_tramites():
     q = request.args.get('q', '').strip()
     categoria = request.args.get('categoria', '').strip()
     results = search_tramites(q, categoria)
+    
+    # Si no hay resultados con la categoría activa pero sí hay consulta,
+    # buscar en todas las categorías para no frustrar al usuario
+    if not results and categoria and categoria.lower() != 'todas':
+        results = search_tramites(q, 'todas')
+    
+    # Si la consulta no coincide plenamente con los 8 trámites o para dar asistencia ampliada
+    orientacion = orientacion_service.find_guidance_for_query(q) if q else None
+    
     return jsonify({
         'total': len(results),
         'query': q,
         'categoria': categoria,
-        'tramites': results
+        'tramites': results,
+        'orientacion_asistida': orientacion
     })
+
+@app.route('/api/orientacion')
+def api_orientacion():
+    q = request.args.get('q', '').strip()
+    orientacion = orientacion_service.find_guidance_for_query(q)
+    if orientacion:
+        return jsonify(orientacion)
+    return jsonify({'error': 'No se especificó consulta'}), 400
 
 @app.route('/api/tramite/<tramite_id>')
 def api_tramite_detail(tramite_id):

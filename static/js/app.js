@@ -174,24 +174,43 @@ function performSearch() {
   fetch(url)
     .then(res => res.json())
     .then(data => {
-      renderTramitesGrid(data.tramites);
+      renderTramitesGrid(data.tramites, data.orientacion_asistida);
     })
     .catch(err => {
       console.error('Error en búsqueda:', err);
     });
 }
 
-function renderTramitesGrid(tramites) {
+function renderTramitesGrid(tramites, orientacionAsistida) {
   const grid = document.getElementById('tramitesGrid');
   const countLabel = document.getElementById('catalogCount');
 
+  // Si no hay trámites cerrados en el catálogo pero tenemos orientación oficial asistida
+  if ((!tramites || tramites.length === 0) && orientacionAsistida) {
+    countLabel.textContent = 'Orientación oficial asistida encontrada';
+    renderAssistedGuidance(orientacionAsistida, grid);
+    return;
+  }
+
+  // Si no hay absolutamente nada
   if (!tramites || tramites.length === 0) {
     countLabel.textContent = '0 trámites encontrados';
     grid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: #ffffff; border-radius: 12px; border: 1px dashed var(--border-strong);">
-        <p style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">No hemos encontrado ningún trámite con esa descripción.</p>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Prueba con palabras más sencillas como "luz", "dni", "casero", "fianza", "paro" o "compra".</p>
-        <button class="btn-card-primary" onclick="resetSearch()" style="display: inline-flex; width: auto; margin: 0 auto;">Ver todos los trámites</button>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; background: #ffffff; border-radius: 12px; border: 1px dashed var(--border-strong);">
+        <p style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">
+          ¿No encuentras el trámite exacto? Podemos ayudarte a redactar tu escrito oficial.
+        </p>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+          Con HagaClic puedes redactar una <b>Instancia General Administrativa (Ley 39/2015)</b> válida legalmente para presentar ante cualquier organismo o ayuntamiento.
+        </p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-card-primary" onclick="openGeneratorWithTemplate('instancia_general')" style="display: inline-flex; width: auto;">
+            Generar Instancia Oficial en PDF
+          </button>
+          <button class="btn-card-secondary" onclick="resetSearch()" style="display: inline-flex; width: auto;">
+            Ver catálogo completo
+          </button>
+        </div>
       </div>
     `;
     return;
@@ -199,7 +218,29 @@ function renderTramitesGrid(tramites) {
 
   countLabel.textContent = `${tramites.length} trámite${tramites.length !== 1 ? 's' : ''} disponible${tramites.length !== 1 ? 's' : ''}`;
 
-  grid.innerHTML = tramites.map(t => `
+  let assistedHtml = '';
+  if (orientacionAsistida && AppState.searchQuery && AppState.searchQuery.length > 3) {
+    assistedHtml = `
+      <div style="grid-column: 1 / -1; background: #eff6ff; border: 2px solid #93c5fd; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: #1e40af; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.4rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Orientación adicional para tu consulta: "${AppState.searchQuery}"</span>
+        </div>
+        <h4 style="font-size: 1.15rem; color: var(--primary); font-weight: 800; margin-bottom: 0.4rem;">${orientacionAsistida.titulo}</h4>
+        <p style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.75rem;">${orientacionAsistida.resumen}</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn-access" style="background: var(--primary); color: #fff;" onclick='showAssistedModal(${JSON.stringify(orientacionAsistida).replace(/'/g, "&apos;")})'>
+            Ver guía paso a paso completa
+          </button>
+          <a href="${orientacionAsistida.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn-access" style="background: #fff; color: var(--primary); border: 1px solid var(--border-strong);">
+            Web oficial (${orientacionAsistida.enlace_texto})
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  grid.innerHTML = assistedHtml + tramites.map(t => `
     <article class="tramite-card" id="card-${t.id}">
       <div class="tramite-card-top">
         <span class="card-category-badge">${t.categoria}</span>
@@ -219,7 +260,7 @@ function renderTramitesGrid(tramites) {
 
         <div class="stamp-verified">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Verificado: ${t.fecha_verificacion.split('(')[0].trim()}</span>
+          <span>Verificado: ${t.fecha_verificacion ? t.fecha_verificacion.split('(')[0].trim() : 'Normativa vigente'}</span>
         </div>
       </div>
 
@@ -234,6 +275,142 @@ function renderTramitesGrid(tramites) {
       </div>
     </article>
   `).join('');
+}
+
+function renderAssistedGuidance(o, grid) {
+  grid.innerHTML = `
+    <div style="grid-column: 1 / -1; background: #ffffff; border: 2px solid var(--primary); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-md);">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <span style="background: #dbeafe; color: #1e40af; font-weight: 800; font-size: 0.82rem; padding: 0.35rem 0.8rem; border-radius: 9999px; text-transform: uppercase;">
+          🏛️ Orientación Oficial Asistida en Tiempo Real
+        </span>
+        <button class="btn-back" onclick="resetSearch()">✕ Limpiar búsqueda y ver catálogo</button>
+      </div>
+
+      <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--primary); line-height: 1.25; margin-bottom: 0.5rem;">
+        ${o.titulo}
+      </h2>
+      <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        ${o.resumen}
+      </p>
+
+      <!-- Resumen de metadatos -->
+      <div class="detail-summary-pills">
+        <div class="summary-box">
+          <div class="summary-box-title">Organismo competente</div>
+          <div class="summary-box-content">${o.organismo}</div>
+        </div>
+        <div class="summary-box accent-box">
+          <div class="summary-box-title">Plazo oficial</div>
+          <div class="summary-box-content">${o.plazo}</div>
+        </div>
+        <div class="summary-box success-box">
+          <div class="summary-box-title">Coste / Tasas</div>
+          <div class="summary-box-content">${o.coste}</div>
+        </div>
+      </div>
+
+      <!-- Pasos a seguir -->
+      <h3 class="detail-section-title" style="margin-top: 1.5rem;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Pasos oficiales que debes seguir paso a paso</span>
+      </h3>
+      <div class="steps-container">
+        ${o.pasos.map(p => `
+          <div class="step-card">
+            <div class="step-number-circle">${p.numero}</div>
+            <div class="step-body">
+              <h4>${p.titulo}</h4>
+              <p>${p.descripcion}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Documentación -->
+      <h3 class="detail-section-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Documentación que necesitarás preparar</span>
+      </h3>
+      <div class="docs-checklist-container" style="margin-bottom: 1.75rem;">
+        <div class="checklist-items">
+          ${o.documentos.map((d, i) => `
+            <label class="checklist-item">
+              <input type="checkbox" />
+              <span class="checklist-text">${d}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Consejos -->
+      ${o.consejos && o.consejos.length > 0 ? `
+        <div class="tips-container" style="margin-bottom: 2rem;">
+          <div class="tips-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Consejos y claves para esta gestión</span>
+          </div>
+          <ul class="tips-list">
+            ${o.consejos.map(c => `<li>${c}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      <!-- Acciones directas -->
+      <div class="detail-action-bar" style="background: var(--bg-subtle); padding: 1.5rem; border-radius: 12px;">
+        <button class="btn-action-primary" onclick="openGeneratorForAssisted('${o.tipo}', '${escapeHtml(o.titulo)}', '${escapeHtml(o.organismo)}')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <span>Generar Instancia / Escrito Oficial en PDF</span>
+        </button>
+
+        <button class="btn-action-secondary" onclick="saveAssistedTramite('${escapeHtml(o.titulo)}')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+          <span>Guardar en "Mis Trámites" con aviso de plazo</span>
+        </button>
+
+        <a href="${o.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn-action-secondary" style="margin-left: auto;">
+          <span>Ir a la web oficial (${o.enlace_texto})</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </a>
+      </div>
+
+    </div>
+  `;
+}
+
+function showAssistedModal(o) {
+  const grid = document.getElementById('tramitesGrid');
+  renderAssistedGuidance(o, grid);
+  window.scrollTo({ top: document.getElementById('catalogHeader').offsetTop - 80, behavior: 'smooth' });
+}
+
+function openGeneratorForAssisted(tipo, titulo, organismo) {
+  switchView('generator');
+  const select = document.getElementById('templateType');
+  select.value = 'instancia_general';
+  updateGeneratorFields('instancia_general');
+
+  // Pre-rellenar campos con la información del trámite asistido
+  document.getElementById('destinatarioNombre').value = organismo || 'Organismo Competente de la Administración Pública';
+  document.getElementById('referenciaContrato').value = titulo || 'Solicitud administrativa';
+  document.getElementById('explicacionHechos').value = `EXPONE: Que en relación al trámite '${titulo}', vengo a presentar la documentación acreditativa y a solicitar formalmente la tramitación y resolución expresa del expediente.`;
+  showToast('Formulario configurado con los datos del trámite');
+}
+
+function saveAssistedTramite(titulo) {
+  const daysStr = prompt(`¿En cuántos días vence el plazo de '${titulo}'? (ej: 30, 60, 180 días)`, '60');
+  if (daysStr === null) return;
+  const days = parseInt(daysStr) || 60;
+  const notes = prompt('Añade una nota o recordatorio personal (opcional):', 'Comprobar documentación requerida.') || '';
+
+  const id = 'asistido-' + Date.now();
+  saveTramiteToStorage(id, titulo, days, notes);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function resetSearch() {
@@ -454,6 +631,11 @@ function updateGeneratorFields(templateType) {
     fechaLabel.textContent = 'Fecha de entrega efectiva de llaves:';
     cuantiaLabel.textContent = 'Importe de la fianza a devolver (€):';
     cuantiaGroup.style.display = 'flex';
+  } else if (templateType === 'instancia_general') {
+    refLabel.textContent = 'Petición concreta o asunto a solicitar:';
+    refHint.textContent = 'Ej: Solicitud de licencia de obras, devolución de ingresos, certificado...';
+    fechaLabel.textContent = 'Fecha de los hechos o ref. anterior (opcional):';
+    cuantiaGroup.style.display = 'none';
   } else { // reclamacion_empresa
     refLabel.textContent = 'Nº de Pedido, Ticket o Contrato:';
     refHint.textContent = 'Código identificador de la compra o servicio.';

@@ -127,6 +127,11 @@ def build_pdf_buffer(template_type, data):
         asunto_text = f"ASUNTO: Reclamación extrajudicial previa de devolución de fianza legal (Art. 36.4 LAU)."
         if data.get('referencia_contrato'):
             asunto_text += f" Inmueble: {data.get('referencia_contrato')}"
+    elif template_type == "instancia_general":
+        doc_title = "SOLICITUD / INSTANCIA GENERAL ADMINISTRATIVA"
+        asunto_text = f"ASUNTO: Solicitud formulada conforme al artículo 66 de la Ley 39/2015 del Procedimiento Administrativo Común."
+        if data.get('referencia_contrato'):
+            asunto_text += f" Ref/Expediente: {data.get('referencia_contrato')}"
     else: # reclamacion_empresa
         doc_title = "RECLAMACIÓN FORMAL PREVIA EN MATERIA DE CONSUMO"
         asunto_text = f"ASUNTO: Reclamación previa formal y solicitud de subsanación / resolución contractual."
@@ -277,6 +282,41 @@ def build_pdf_buffer(template_type, data):
             "facturas oficiales con desglose de IVA de reparaciones efectivamente realizadas (no siendo válidos meros presupuestos), interpondré de forma inmediata "
             "<b>demanda de Juicio Verbal por reclamación de cantidad</b> ante el Juzgado de Primera Instancia competente, reclamando el principal, los intereses "
             "legales devengados desde el cumplimiento del mes y las costas procesales a que hubiera lugar.",
+            body_style
+        ))
+    elif template_type == "instancia_general":
+        story.append(Paragraph(
+            f"El/La abajo firmante, <b>{data.get('solicitante_nombre')}</b>, mayor de edad, con documento de identidad "
+            f"<b>{data.get('solicitante_nif')}</b> y domicilio a efectos de notificaciones en {data.get('solicitante_direccion')}, "
+            f"comparece y, como mejor proceda en Derecho ante el órgano o entidad <b>{data.get('destinatario_nombre')}</b>, manifiesta:",
+            body_style
+        ))
+
+        story.append(Paragraph("<b>I. EXPONE:</b>", bold_body_style))
+        expone_text = explicacion if explicacion else (
+            "Que concurren en el/la interesado/a los requisitos y circunstancias legalmente exigibles para formular la presente petición, "
+            "adjuntando la documentación justificativa correspondiente."
+        )
+        if fecha_hecho:
+            expone_text = f"Con fecha o referencia {fecha_hecho}: " + expone_text
+        story.append(Paragraph(expone_text, body_style))
+
+        story.append(Paragraph(
+            "<b>FUNDAMENTO LEGAL:</b>", bold_body_style
+        ))
+        story.append(Paragraph(
+            "La presente solicitud se formula al amparo del <b>artículo 66 de la Ley 39/2015, de 1 de octubre, del Procedimiento Administrativo "
+            "Común de las Administraciones Públicas (LPAC)</b>, que consagra el derecho de toda persona a presentar solicitudes, escritos y comunicaciones "
+            "ante cualquier organismo público con plena validez jurídica.",
+            legal_cite_style
+        ))
+
+        story.append(Paragraph("<b>II. SOLICITA:</b>", bold_body_style))
+        solicita_text = ref_contrato if ref_contrato else "Que se tenga por presentado este escrito, se sirva admitirlo a trámite y se resuelva de conformidad con lo expuesto."
+        story.append(Paragraph(
+            f"1. Que teniendo por presentado este escrito en tiempo y forma, se digne admitirlo a trámite.<br/>"
+            f"2. <b>Petición concreta:</b> {solicita_text}<br/>"
+            f"3. Que se dicte resolución expresa motivada en el plazo legalmente establecido, notificándola en el domicilio o canal telemático facilitado.",
             body_style
         ))
 
