@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HagaClic - Asistente de Trámites Administrativos de España</title>
   <meta name="description" content="Guías paso a paso sencillas, documentos necesarios, plazos legales y generador de cartas oficiales en PDF para trámites en España.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.7">
 </head>
 <body>
 
@@ -155,16 +155,21 @@
 
     <!-- 3. VISTA: GENERADOR DE CARTAS EN PDF -->
     <section id="viewGenerator" class="generator-section" style="display: none;">
-      <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">
-          Generador de Cartas Oficiales en PDF
-        </h2>
-        <p style="color: var(--text-muted); font-size: 1rem;">
-          Cumplimenta los datos y descarga al instante un escrito formal estructurado con fundamentación legal española, listo para imprimir, firmar y enviar por correo certificado o burofax.
-        </p>
+      <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">
+            Generador de Cartas Oficiales en PDF
+          </h2>
+          <p style="color: var(--text-muted); font-size: 1rem; max-width: 750px;">
+            Cumplimenta los datos y descarga al instante un escrito formal estructurado con fundamentación legal española, listo para imprimir, firmar y presentar.
+          </p>
+        </div>
+        <button type="button" class="btn-access" onclick="fillSampleData()" style="background: var(--bg-subtle); color: var(--primary); border: 1.5px solid var(--border-strong); padding: 0.5rem 1rem; font-size: 0.9rem;">
+          📝 Rellenar con datos de ejemplo
+        </button>
       </div>
 
-      <form id="letterForm">
+      <form id="letterForm" novalidate>
         <div class="form-grid">
           
           <!-- Selección de plantilla -->
@@ -195,18 +200,18 @@
           </div>
 
           <div class="form-group full-width">
-            <label for="solicitanteDireccion" class="form-label">Tu dirección postal completa: *</label>
-            <input type="text" id="solicitanteDireccion" class="form-input" placeholder="Ej: Calle Gran Vía 24, 3º B, 28013 Madrid" required>
+            <label for="solicitanteDireccion" class="form-label">Tu dirección postal completa (opcional):</label>
+            <input type="text" id="solicitanteDireccion" class="form-input" placeholder="Ej: Calle Gran Vía 24, 3º B, 28013 Madrid">
           </div>
 
           <div class="form-group">
-            <label for="solicitanteTelefono" class="form-label">Teléfono de contacto: *</label>
-            <input type="tel" id="solicitanteTelefono" class="form-input" placeholder="Ej: 612 345 678" required>
+            <label for="solicitanteTelefono" class="form-label">Teléfono de contacto (opcional):</label>
+            <input type="tel" id="solicitanteTelefono" class="form-input" placeholder="Ej: 612 345 678">
           </div>
 
           <div class="form-group">
-            <label for="solicitanteEmail" class="form-label">Correo electrónico: *</label>
-            <input type="email" id="solicitanteEmail" class="form-input" placeholder="Ej: tuemail@ejemplo.com" required>
+            <label for="solicitanteEmail" class="form-label">Correo electrónico (opcional):</label>
+            <input type="email" id="solicitanteEmail" class="form-input" placeholder="Ej: tuemail@ejemplo.com">
           </div>
 
           <!-- Bloque: Datos del Destinatario -->
@@ -322,6 +327,6 @@
     </div>
   </footer>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}?v=1.5"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=1.7"></script>
 </body>
 </html>

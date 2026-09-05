@@ -105,6 +105,8 @@ function initNavigation() {
 }
 
 function switchView(viewName) {
+  const heroSection = document.querySelector('.hero-section');
+  
   // Ocultar todas las secciones
   document.getElementById('viewCatalog').style.display = 'none';
   document.getElementById('viewDetail').style.display = 'none';
@@ -115,23 +117,29 @@ function switchView(viewName) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
   if (viewName === 'catalog') {
+    if (heroSection) heroSection.style.display = 'block';
     document.getElementById('viewCatalog').style.display = 'block';
     const btn = document.querySelector('.nav-btn[data-target="catalog"]');
     if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (viewName === 'generator') {
+    // Al entrar al generador ocultamos el buscador grande para que el formulario se vea de inmediato
+    if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewGenerator').style.display = 'block';
     const btn = document.querySelector('.nav-btn[data-target="generator"]');
     if (btn) btn.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (viewName === 'saved') {
+    if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewSaved').style.display = 'block';
     const btn = document.querySelector('.nav-btn[data-target="saved"]');
     if (btn) btn.classList.add('active');
     renderSavedTramites();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (viewName === 'detail') {
+    if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewDetail').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }
 }
 
@@ -665,15 +673,25 @@ function updateDocProgressCounter(tramiteId, totalDocs) {
 function initLetterGenerator() {
   const form = document.getElementById('letterForm');
   const templateSelect = document.getElementById('templateType');
+  const btnSubmit = document.getElementById('btnSubmitPdf');
 
   templateSelect.addEventListener('change', () => {
     updateGeneratorFields(templateSelect.value);
   });
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    generateAndDownloadPdf();
-  });
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      generateAndDownloadPdf();
+    });
+  }
+
+  if (btnSubmit) {
+    btnSubmit.addEventListener('click', (e) => {
+      e.preventDefault();
+      generateAndDownloadPdf();
+    });
+  }
 }
 
 function openGeneratorWithTemplate(templateType) {
@@ -719,6 +737,27 @@ function updateGeneratorFields(templateType) {
 
 function generateAndDownloadPdf() {
   const btnSubmit = document.getElementById('btnSubmitPdf');
+
+  const solicitanteNombre = document.getElementById('solicitanteNombre').value.trim();
+  const solicitanteNif = document.getElementById('solicitanteNif').value.trim();
+  const destinatarioNombre = document.getElementById('destinatarioNombre').value.trim();
+
+  if (!solicitanteNombre) {
+    alert('Por favor, indica tu nombre y apellidos en "Tus datos".');
+    document.getElementById('solicitanteNombre').focus();
+    return;
+  }
+  if (!solicitanteNif) {
+    alert('Por favor, indica tu DNI / NIE / Pasaporte en "Tus datos".');
+    document.getElementById('solicitanteNif').focus();
+    return;
+  }
+  if (!destinatarioNombre) {
+    alert('Por favor, indica el nombre de la empresa, casero o entidad destinataria.');
+    document.getElementById('destinatarioNombre').focus();
+    return;
+  }
+
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `<span>Generando documento oficial...</span>`;
 
@@ -759,8 +798,13 @@ function generateAndDownloadPdf() {
       a.download = `carta_oficial_${payload.template_type}.pdf`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      
+      // Retrasar revocación para que los navegadores modernos no aborten la descarga del archivo
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      }, 2500);
+
       showToast('¡Carta oficial descargada con éxito!');
     })
     .catch(err => {
@@ -773,6 +817,50 @@ function generateAndDownloadPdf() {
         <span>Descargar Carta Formal en PDF</span>
       `;
     });
+}
+
+function fillSampleData() {
+  const currentTemplate = document.getElementById('templateType').value;
+  document.getElementById('solicitanteNombre').value = 'María García López';
+  document.getElementById('solicitanteNif').value = '12345678X';
+  document.getElementById('solicitanteDireccion').value = 'Calle Gran Vía 24, 3º B, 28013 Madrid';
+  document.getElementById('solicitanteTelefono').value = '612 345 678';
+  document.getElementById('solicitanteEmail').value = 'maria.garcia@ejemplo.com';
+  document.getElementById('ciudadFirma').value = 'Madrid';
+
+  if (currentTemplate === 'baja_suministro') {
+    document.getElementById('destinatarioNombre').value = 'Telefónica de España S.A.';
+    document.getElementById('destinatarioCif').value = 'A-28015865';
+    document.getElementById('destinatarioDireccion').value = 'Servicio de Bajas y Atención al Cliente';
+    document.getElementById('referenciaContrato').value = 'Línea fija 912345678 / Contrato TEL-889900';
+    document.getElementById('fechaHecho').value = new Date().toLocaleDateString('es-ES');
+    document.getElementById('explicacionHechos').value = 'Habiendo cumplido el periodo de permanencia pactado, solicito la baja definitiva e inmediata del servicio de fibra y línea fija en el plazo legal de 2 días hábiles, rogando me indiquen el punto de entrega para devolver el router.';
+  } else if (currentTemplate === 'reclamar_fianza') {
+    document.getElementById('destinatarioNombre').value = 'Juan Propietario Arrendador';
+    document.getElementById('destinatarioCif').value = '';
+    document.getElementById('destinatarioDireccion').value = 'Calle Alcalá 50, 1º A, Madrid';
+    document.getElementById('referenciaContrato').value = 'Vivienda sita en Calle Princesa 10, 4º B, Madrid';
+    document.getElementById('fechaHecho').value = '15 de enero de 2025';
+    document.getElementById('cuantia').value = '850';
+    document.getElementById('explicacionHechos').value = 'Habiendo transcurrido más de 30 días naturales desde la entrega efectiva de llaves sin haberse acreditado desperfectos mediante facturas con IVA, requiero la devolución íntegra de la fianza legal depositada con sus intereses legales.';
+  } else if (currentTemplate === 'instancia_general') {
+    document.getElementById('destinatarioNombre').value = 'Ayuntamiento de Madrid - Distrito Centro';
+    document.getElementById('destinatarioCif').value = 'P-2807900B';
+    document.getElementById('destinatarioDireccion').value = 'Oficina de Atención a la Ciudadanía';
+    document.getElementById('referenciaContrato').value = 'Solicitud de vado permanente / licencia de obra';
+    document.getElementById('fechaHecho').value = new Date().toLocaleDateString('es-ES');
+    document.getElementById('explicacionHechos').value = 'EXPONE: Que habiendo realizado las adecuaciones técnicas requeridas en el local, SOLICITA se tenga por presentado este escrito y se sirva autorizar la concesión de la licencia municipal solicitada.';
+  } else { // reclamacion_empresa
+    document.getElementById('destinatarioNombre').value = 'Comercial Electrodomésticos S.L.';
+    document.getElementById('destinatarioCif').value = 'B-12345678';
+    document.getElementById('destinatarioDireccion').value = 'Departamento de Calidad y Postventa';
+    document.getElementById('referenciaContrato').value = 'Factura FAC-2025-0045';
+    document.getElementById('fechaHecho').value = '10 de diciembre de 2024';
+    document.getElementById('cuantia').value = '349';
+    document.getElementById('explicacionHechos').value = 'El televisor adquirido presentó un fallo en la pantalla dentro de los 3 años de garantía legal. Solicito formalmente la reparación o sustitución por una unidad idéntica sin coste alguno en el plazo de 10 días hábiles.';
+  }
+
+  showToast('Datos de ejemplo cargados en el formulario');
 }
 
 // ============================================================================
