@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HagaClic - Asistente de Trámites Administrativos de España</title>
   <meta name="description" content="Guías paso a paso sencillas, documentos necesarios, plazos legales y generador de cartas oficiales en PDF para trámites en España.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.7">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.0">
 </head>
 <body>
 
@@ -24,6 +24,10 @@
         <button id="btnToggleContrast" class="btn-access" title="Activar modo de alto contraste para facilitar la lectura">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 0 1 0-16z"/></svg>
           <span>Alto Contraste</span>
+        </button>
+        <button id="btnToggleDark" class="btn-access" title="Alternar modo oscuro/claro">
+          <span id="darkModeIcon" style="font-size: 1rem;">🌙</span>
+          <span id="darkModeLabel">Modo Oscuro</span>
         </button>
       </div>
     </div>
@@ -64,6 +68,12 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             <span>Mis Trámites</span>
             <span class="badge-count" id="savedCountBadge" style="display: none;">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-target="calculator">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="10" y2="10"></line><line x1="14" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="10" y2="14"></line><line x1="14" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="16" y2="18"></line></svg>
+            <span>Calculadora</span>
           </button>
         </li>
       </ul>
@@ -299,6 +309,97 @@
       </div>
     </section>
 
+    <!-- 5. VISTA: CALCULADORA DE PLAZOS Y COSTES -->
+    <section id="viewCalculator" class="calculator-section" style="display: none;">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">Calculadora de Plazos y Costes</h2>
+        <p style="color: var(--text-muted); font-size: 1rem;">Calcula tu fecha límite exacta según la normativa vigente, consulta los costes desglosados de cada trámite y exporta recordatorios a tu calendario.</p>
+      </div>
+
+      <div class="calc-tabs">
+        <button class="calc-tab active" data-calc-tab="plazos">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Calculadora de Plazos
+        </button>
+        <button class="calc-tab" data-calc-tab="costes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Calculadora de Costes
+        </button>
+      </div>
+
+      <!-- Panel: Plazos -->
+      <div class="calc-panel active" id="calcPanelPlazos">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="calcTramiteSelect" class="form-label">Tipo de trámite:</label>
+            <select id="calcTramiteSelect" class="form-select">
+              <option value="fianza">Devolución de fianza (30 días naturales)</option>
+              <option value="sucesiones">Impuesto de Sucesiones (6 meses)</option>
+              <option value="desempleo">Solicitud prestación desempleo (15 días hábiles)</option>
+              <option value="consumo">Reclamación consumo — respuesta empresa (30 días naturales)</option>
+              <option value="dgt_transfer">Transferencia vehículo DGT (30 días naturales)</option>
+              <option value="baja_suministro">Baja de suministro (2 días hábiles)</option>
+              <option value="custom">Personalizado...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="calcFechaInicio" class="form-label">Fecha del suceso o inicio:</label>
+            <input type="date" id="calcFechaInicio" class="form-input">
+          </div>
+          <div class="form-group" id="calcCustomGroup" style="display:none;">
+            <label for="calcCustomDias" class="form-label">Número de días:</label>
+            <input type="number" id="calcCustomDias" class="form-input" placeholder="Ej: 30" min="1">
+          </div>
+          <div class="form-group" id="calcCustomTypeGroup" style="display:none;">
+            <label for="calcCustomTipo" class="form-label">Tipo de días:</label>
+            <select id="calcCustomTipo" class="form-select">
+              <option value="naturales">Días naturales</option>
+              <option value="habiles">Días hábiles (L-V, sin festivos nacionales)</option>
+            </select>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+          <button class="btn-action-primary" onclick="calculateDeadline()" style="display: inline-flex; width: auto;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Calcular Fecha Límite</span>
+          </button>
+        </div>
+        <div id="calcResultBox" class="calc-result-box" style="display:none;">
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Tu fecha límite es:</p>
+          <div class="calc-result-date" id="calcResultDate"></div>
+          <div class="calc-result-days" id="calcResultDays"></div>
+          <button class="btn-calendar-export" onclick="exportToCalendar()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Añadir a mi Calendario (.ics)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel: Costes -->
+      <div class="calc-panel" id="calcPanelCostes">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="calcCosteTramite" class="form-label">Selecciona un trámite para ver el desglose:</label>
+            <select id="calcCosteTramite" class="form-select">
+              <option value="dni">Renovar el DNI</option>
+              <option value="pasaporte">Renovar el Pasaporte</option>
+              <option value="dgt_transfer">Transferencia de vehículo (DGT)</option>
+              <option value="sucesiones">Herencia / Sucesiones</option>
+              <option value="empadronamiento">Empadronamiento</option>
+              <option value="extranjeria_nie">Cita Extranjería (NIE/TIE)</option>
+            </select>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+          <button class="btn-action-primary" onclick="calculateCosts()" style="display: inline-flex; width: auto;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span>Ver Desglose de Costes</span>
+          </button>
+        </div>
+        <div id="costResultBox" class="cost-breakdown" style="display:none;"></div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Pie de Página -->
@@ -327,6 +428,30 @@
     </div>
   </footer>
 
-  <script src="{{ url_for('static', filename='js/app.js') }}?v=1.7"></script>
+  <!-- Chatbot FAB + Panel -->
+  <button class="chatbot-fab" id="chatbotFab" title="Asistente de trámites">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+  </button>
+
+  <div class="chatbot-panel" id="chatbotPanel" style="display:none;">
+    <div class="chatbot-header">
+      <div class="chatbot-header-title">
+        <span class="chat-avatar">🏛️</span>
+        <span>Asistente HagaClic</span>
+      </div>
+      <button class="chatbot-close" id="chatbotClose" title="Cerrar chat">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <!-- Messages rendered dynamically -->
+    </div>
+    <div class="chatbot-input-area">
+      <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Escribe tu consulta..." autocomplete="off">
+      <button class="chatbot-send" id="chatbotSend" title="Enviar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=2.0"></script>
 </body>
 </html>

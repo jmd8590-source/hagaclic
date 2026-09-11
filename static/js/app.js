@@ -16,9 +16,12 @@ const AppState = {
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   initAccessibility();
+  initDarkMode();
   initNavigation();
   initSearchAndFilters();
   initLetterGenerator();
+  initCalculator();
+  initChatbot();
   loadInitialTramites();
   updateSavedBadgeCount();
   renderSavedTramites();
@@ -112,6 +115,7 @@ function switchView(viewName) {
   document.getElementById('viewDetail').style.display = 'none';
   document.getElementById('viewGenerator').style.display = 'none';
   document.getElementById('viewSaved').style.display = 'none';
+  document.getElementById('viewCalculator').style.display = 'none';
 
   // Desmarcar botones activos de navegación
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -139,6 +143,12 @@ function switchView(viewName) {
   } else if (viewName === 'detail') {
     if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewDetail').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  } else if (viewName === 'calculator') {
+    if (heroSection) heroSection.style.display = 'none';
+    document.getElementById('viewCalculator').style.display = 'block';
+    const btn = document.querySelector('.nav-btn[data-target="calculator"]');
+    if (btn) btn.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 }
@@ -621,7 +631,12 @@ function renderTramiteDetail(t) {
 
       <button class="btn-action-secondary" onclick="promptSaveCurrentTramite()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-        <span>Guardar en "Mis Trámites" con aviso de plazo</span>
+        <span>Guardar en "Mis Trámites"</span>
+      </button>
+
+      <button class="btn-share-inline" onclick="openShareModal('${escapeHtml(t.titulo)}', '${escapeHtml(t.resumen)}', '${t.id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        <span>Compartir</span>
       </button>
 
       <a href="${t.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn-action-secondary" style="margin-left: auto;">
@@ -898,7 +913,8 @@ function saveTramiteToStorage(id, titulo, daysDeadline, notes) {
     fechaInicio: now.toISOString(),
     fechaLimite: deadline.toISOString(),
     notas: notes,
-    completado: false
+    completado: false,
+    stepsCompleted: []
   };
 
   if (existingIndex >= 0) {
@@ -923,83 +939,7 @@ function updateSavedBadgeCount() {
   }
 }
 
-function renderSavedTramites() {
-  const container = document.getElementById('savedListContainer');
-  if (!container) return;
-
-  if (AppState.savedTramites.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 3rem 1rem; border: 1px dashed var(--border-strong); border-radius: 12px;">
-        <p style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">No tienes ningún trámite guardado todavía.</p>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Explora los trámites del catálogo y pulsa "Guardar" para tener control sobre los plazos y fechas límite.</p>
-        <button class="btn-card-primary" onclick="switchView('catalog')" style="display: inline-flex; width: auto; margin: 0 auto;">Buscar un trámite</button>
-      </div>
-    `;
-    return;
-  }
-
-  const now = new Date();
-
-  container.innerHTML = AppState.savedTramites.map((t, idx) => {
-    const deadline = new Date(t.fechaLimite);
-    const diffTime = deadline - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    let statusBadge = '';
-    if (t.completado) {
-      statusBadge = `<span class="saved-status-badge status-done">Completado</span>`;
-    } else if (diffDays < 0) {
-      statusBadge = `<span class="saved-status-badge status-urgent">Plazo vencido (${Math.abs(diffDays)} días tarde)</span>`;
-    } else if (diffDays <= 3) {
-      statusBadge = `<span class="saved-status-badge status-urgent">¡Urgente! Vence en ${diffDays} día${diffDays !== 1 ? 's' : ''}</span>`;
-    } else {
-      statusBadge = `<span class="saved-status-badge status-active">En plazo: quedan ${diffDays} días</span>`;
-    }
-
-    return `
-      <div class="saved-card ${t.completado ? 'completed' : ''}">
-        <div style="flex: 1; min-width: 250px;">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
-            ${statusBadge}
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Iniciado el ${new Date(t.fechaInicio).toLocaleDateString('es-ES')}</span>
-          </div>
-          <h4 style="font-size: 1.15rem; color: var(--primary); font-weight: 800; margin-bottom: 0.35rem;">${t.titulo}</h4>
-          <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem;"><b>Plazo límite legal:</b> ${deadline.toLocaleDateString('es-ES')}</p>
-          ${t.notas ? `<p style="font-size: 0.85rem; color: var(--text-muted); background: var(--bg-subtle); padding: 0.4rem 0.6rem; border-radius: 4px; display: inline-block;">Nota: ${t.notas}</p>` : ''}
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <button class="btn-access" style="background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--border);" onclick="openTramiteDetail('${t.id}')">
-            Ver guía
-          </button>
-          <button class="btn-access" style="background: ${t.completado ? '#f1f5f9' : 'var(--success-light)'}; color: ${t.completado ? '#475569' : 'var(--success)'}; border: 1px solid currentColor;" onclick="toggleCompleteSaved(${idx})">
-            ${t.completado ? 'Reabrir' : 'Completado ✓'}
-          </button>
-          <button class="btn-access" style="background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger);" title="Eliminar trámite" onclick="deleteSavedTramite(${idx})">
-            ✕
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleCompleteSaved(idx) {
-  AppState.savedTramites[idx].completado = !AppState.savedTramites[idx].completado;
-  localStorage.setItem('hagaclic_saved_tramites', JSON.stringify(AppState.savedTramites));
-  updateSavedBadgeCount();
-  renderSavedTramites();
-}
-
-function deleteSavedTramite(idx) {
-  if (confirm('¿Deseas eliminar este trámite de tu lista guardada?')) {
-    AppState.savedTramites.splice(idx, 1);
-    localStorage.setItem('hagaclic_saved_tramites', JSON.stringify(AppState.savedTramites));
-    updateSavedBadgeCount();
-    renderSavedTramites();
-    showToast('Trámite eliminado de Mis Trámites');
-  }
-}
+// (renderSavedTramites, toggleCompleteSaved, deleteSavedTramite moved to section 10 - Timeline Visual)
 
 // ============================================================================
 // 7. Utilidad: Notificaciones Toast
@@ -1021,4 +961,867 @@ function showToast(message) {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
   }, 3200);
+}
+
+// ============================================================================
+// 8. Dark Mode
+// ============================================================================
+function initDarkMode() {
+  const btnDark = document.getElementById('btnToggleDark');
+  const iconEl = document.getElementById('darkModeIcon');
+  const labelEl = document.getElementById('darkModeLabel');
+
+  // Check localStorage first, then system preference
+  let savedPref = localStorage.getItem('hagaclic_dark_mode');
+  if (savedPref === null) {
+    // Auto-detect
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      savedPref = 'true';
+    } else {
+      savedPref = 'false';
+    }
+  }
+
+  function applyDark(active) {
+    document.documentElement.classList.toggle('dark-mode', active);
+    if (iconEl) iconEl.textContent = active ? '☀️' : '🌙';
+    if (labelEl) labelEl.textContent = active ? 'Modo Claro' : 'Modo Oscuro';
+    if (btnDark) {
+      if (active) {
+        btnDark.style.background = '#fbbf24';
+        btnDark.style.color = '#0f172a';
+        btnDark.style.borderColor = '#f59e0b';
+      } else {
+        btnDark.style.background = 'rgba(255, 255, 255, 0.15)';
+        btnDark.style.color = '#ffffff';
+        btnDark.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      }
+    }
+  }
+
+  applyDark(savedPref === 'true');
+
+  if (btnDark) {
+    btnDark.addEventListener('click', () => {
+      const isActive = document.documentElement.classList.contains('dark-mode');
+      const newState = !isActive;
+      applyDark(newState);
+      localStorage.setItem('hagaclic_dark_mode', newState);
+      showToast(newState ? 'Modo oscuro activado 🌙' : 'Modo claro activado ☀️');
+    });
+  }
+
+  // Listen for system changes
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (localStorage.getItem('hagaclic_dark_mode') === null) {
+        applyDark(e.matches);
+      }
+    });
+  }
+}
+
+// ============================================================================
+// 9. Share Modal (WhatsApp, Email, Copy, Print, QR)
+// ============================================================================
+let _shareData = {};
+
+function openShareModal(titulo, resumen, tramiteId) {
+  _shareData = { titulo, resumen, tramiteId };
+  const pageUrl = window.location.origin + '/?tramite=' + (tramiteId || '');
+  const shareText = `📝 Trámite: ${titulo}\n${resumen}\n\n🔗 Más info: ${pageUrl}\n\n(Vía HagaClic - Asistente de Trámites de España)`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'share-overlay';
+  overlay.id = 'shareOverlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeShareModal(); };
+
+  overlay.innerHTML = `
+    <div class="share-modal">
+      <div class="share-modal-header">
+        <h3>Compartir trámite</h3>
+        <button class="share-modal-close" onclick="closeShareModal()">✕</button>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem; font-weight: 600;">${titulo}</p>
+      <div class="share-options-grid">
+        <button class="share-option-btn whatsapp" onclick="shareWhatsApp()">
+          <span class="share-option-icon">📱</span>
+          <span>WhatsApp</span>
+        </button>
+        <button class="share-option-btn email" onclick="shareEmail()">
+          <span class="share-option-icon">📧</span>
+          <span>Email</span>
+        </button>
+        <button class="share-option-btn copy" onclick="shareCopy()">
+          <span class="share-option-icon">📋</span>
+          <span>Copiar</span>
+        </button>
+        <button class="share-option-btn print" onclick="sharePrint()">
+          <span class="share-option-icon">🖨️</span>
+          <span>Imprimir</span>
+        </button>
+      </div>
+      <div class="share-qr-section">
+        <p>📲 Escanea el código QR para acceder desde otro dispositivo</p>
+        <canvas id="shareQrCanvas" width="150" height="150"></canvas>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  generateQR(pageUrl);
+}
+
+function closeShareModal() {
+  const overlay = document.getElementById('shareOverlay');
+  if (overlay) overlay.remove();
+}
+
+function shareWhatsApp() {
+  const pageUrl = window.location.origin + '/?tramite=' + (_shareData.tramiteId || '');
+  const text = `📝 *${_shareData.titulo}*\n${_shareData.resumen}\n\n🔗 ${pageUrl}\n\n_(Vía HagaClic)_`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  showToast('Abriendo WhatsApp...');
+  closeShareModal();
+}
+
+function shareEmail() {
+  const pageUrl = window.location.origin + '/?tramite=' + (_shareData.tramiteId || '');
+  const subject = `Información sobre trámite: ${_shareData.titulo}`;
+  const body = `Hola,\n\nTe comparto información sobre este trámite:\n\n${_shareData.titulo}\n${_shareData.resumen}\n\nMás info: ${pageUrl}\n\n(Enviado desde HagaClic - Asistente de Trámites de España)`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  showToast('Abriendo correo electrónico...');
+  closeShareModal();
+}
+
+function shareCopy() {
+  const pageUrl = window.location.origin + '/?tramite=' + (_shareData.tramiteId || '');
+  const text = `📝 ${_shareData.titulo}\n${_shareData.resumen}\n🔗 ${pageUrl}`;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('¡Copiado al portapapeles!');
+    closeShareModal();
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast('¡Copiado al portapapeles!');
+    closeShareModal();
+  });
+}
+
+function sharePrint() {
+  closeShareModal();
+  setTimeout(() => window.print(), 300);
+}
+
+// Simple QR Code generator (canvas-based, no external deps)
+function generateQR(url) {
+  const canvas = document.getElementById('shareQrCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const size = 150;
+  canvas.width = size;
+  canvas.height = size;
+  
+  // Simple QR-like visual with the URL encoded as a pattern
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+  
+  // Generate a deterministic pattern from the URL
+  const modules = 21;
+  const cellSize = Math.floor(size / modules);
+  const offset = Math.floor((size - cellSize * modules) / 2);
+  
+  ctx.fillStyle = '#000000';
+  
+  // Position detection patterns (3 corners)
+  function drawFinderPattern(x, y) {
+    // Outer
+    ctx.fillRect(offset + x * cellSize, offset + y * cellSize, 7 * cellSize, 7 * cellSize);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(offset + (x+1) * cellSize, offset + (y+1) * cellSize, 5 * cellSize, 5 * cellSize);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(offset + (x+2) * cellSize, offset + (y+2) * cellSize, 3 * cellSize, 3 * cellSize);
+  }
+  
+  drawFinderPattern(0, 0);
+  drawFinderPattern(modules - 7, 0);
+  drawFinderPattern(0, modules - 7);
+  
+  // Data modules - simple hash-based pattern
+  let hash = 0;
+  for (let i = 0; i < url.length; i++) {
+    hash = ((hash << 5) - hash + url.charCodeAt(i)) | 0;
+  }
+  
+  for (let row = 0; row < modules; row++) {
+    for (let col = 0; col < modules; col++) {
+      // Skip finder patterns
+      if ((row < 8 && col < 8) || (row < 8 && col > modules - 9) || (row > modules - 9 && col < 8)) continue;
+      
+      const bit = ((hash * (row * modules + col + 1)) >>> 0) % 3;
+      if (bit === 0) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(offset + col * cellSize, offset + row * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+  
+  // Center label
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(size/2 - 22, size/2 - 8, 44, 16);
+  ctx.fillStyle = '#0f2942';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('HAGACLIC', size/2, size/2 + 4);
+}
+
+// ============================================================================
+// 10. Timeline Visual - Mis Trámites (Mejora 3)
+// ============================================================================
+function renderSavedTramites() {
+  const container = document.getElementById('savedListContainer');
+  if (!container) return;
+
+  if (AppState.savedTramites.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1rem; border: 1px dashed var(--border-strong); border-radius: 12px;">
+        <p style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">No tienes ningún trámite guardado todavía.</p>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Explora los trámites del catálogo y pulsa "Guardar" para tener control visual sobre los plazos y fases.</p>
+        <button class="btn-card-primary" onclick="switchView('catalog')" style="display: inline-flex; width: auto; margin: 0 auto;">Buscar un trámite</button>
+      </div>
+    `;
+    return;
+  }
+
+  const now = new Date();
+
+  container.innerHTML = AppState.savedTramites.map((t, idx) => {
+    const deadline = new Date(t.fechaLimite);
+    const diffTime = deadline - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const stepsCompleted = t.stepsCompleted || [];
+
+    // Find the tramite steps from catalog
+    const catalogItem = AppState.allTramites.find(x => x.id === t.id);
+    const steps = catalogItem ? catalogItem.pasos : [];
+    const totalSteps = steps.length || 1;
+    const completedCount = Math.min(stepsCompleted.length, totalSteps);
+    const progressPercent = Math.round((completedCount / totalSteps) * 100);
+    const isAllDone = t.completado || progressPercent === 100;
+
+    // Deadline badge
+    let badgeClass = 'safe';
+    let badgeText = `🟢 En plazo: quedan ${diffDays} días`;
+    if (isAllDone) {
+      badgeClass = 'done';
+      badgeText = '✅ Completado';
+    } else if (diffDays < 0) {
+      badgeClass = 'urgent';
+      badgeText = `⚠️ Plazo vencido (${Math.abs(diffDays)} días tarde)`;
+    } else if (diffDays <= 5) {
+      badgeClass = 'urgent';
+      badgeText = `🔴 ¡Urgente! Vence en ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
+    } else if (diffDays <= 15) {
+      badgeClass = 'warning';
+      badgeText = `🟡 Atención: quedan ${diffDays} días`;
+    }
+
+    // Donut SVG
+    const radius = 28;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+    const donutColor = isAllDone ? '#34d399' : progressPercent > 50 ? '#3b82f6' : '#f59e0b';
+
+    // Timeline steps HTML
+    let stepsHtml = '';
+    if (steps.length > 0) {
+      stepsHtml = `<div class="timeline-steps">${steps.map((s, si) => {
+        const isDone = stepsCompleted.includes(si);
+        const isActive = !isDone && (si === 0 || stepsCompleted.includes(si - 1));
+        const stateClass = isDone ? 'completed' : isActive ? 'active' : '';
+        return `
+          <div class="timeline-step ${stateClass}">
+            <div class="timeline-step-dot"></div>
+            <span class="timeline-step-label">${s.titulo}</span>
+            <button class="timeline-step-toggle" onclick="toggleTimelineStep(${idx}, ${si})">
+              ${isDone ? 'Deshacer' : 'Hecho ✓'}
+            </button>
+          </div>
+        `;
+      }).join('')}</div>`;
+    }
+
+    return `
+      <div class="timeline-card ${isAllDone ? 'completed' : ''}" id="timeline-card-${idx}">
+        <div class="timeline-card-header">
+          <div class="timeline-card-info">
+            <h4>${t.titulo}</h4>
+            <div class="timeline-card-meta">
+              <span class="deadline-badge ${badgeClass}">${badgeText}</span>
+              <span>Inicio: ${new Date(t.fechaInicio).toLocaleDateString('es-ES')}</span>
+              <span>Límite: ${deadline.toLocaleDateString('es-ES')}</span>
+            </div>
+            ${t.notas ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; background: var(--bg-subtle); padding: 0.4rem 0.6rem; border-radius: 4px;"><strong>Nota:</strong> ${t.notas}</p>` : ''}
+          </div>
+          <div class="donut-progress">
+            <svg width="68" height="68">
+              <circle cx="34" cy="34" r="${radius}" fill="none" stroke="var(--border)" stroke-width="6"></circle>
+              <circle cx="34" cy="34" r="${radius}" fill="none" stroke="${donutColor}" stroke-width="6" 
+                stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}" 
+                stroke-linecap="round" style="transition: stroke-dashoffset 0.6s ease;"></circle>
+            </svg>
+            <div class="donut-progress-text">${progressPercent}%</div>
+          </div>
+        </div>
+
+        ${stepsHtml}
+
+        <div class="timeline-card-actions">
+          <button class="btn-access" style="background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--border);" onclick="openTramiteDetail('${t.id}')">
+            Ver guía
+          </button>
+          <button class="btn-access" style="background: ${isAllDone ? '#f1f5f9' : 'var(--success-light)'}; color: ${isAllDone ? '#475569' : 'var(--success)'}; border: 1px solid currentColor;" onclick="toggleCompleteSaved(${idx})">
+            ${isAllDone ? 'Reabrir' : 'Completar todo ✓'}
+          </button>
+          <button class="btn-access" style="background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger);" title="Eliminar" onclick="deleteSavedTramite(${idx})">
+            ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleTimelineStep(tramiteIdx, stepIdx) {
+  const t = AppState.savedTramites[tramiteIdx];
+  if (!t.stepsCompleted) t.stepsCompleted = [];
+  
+  const pos = t.stepsCompleted.indexOf(stepIdx);
+  if (pos >= 0) {
+    t.stepsCompleted.splice(pos, 1);
+  } else {
+    t.stepsCompleted.push(stepIdx);
+  }
+
+  // Check if all steps are done
+  const catalogItem = AppState.allTramites.find(x => x.id === t.id);
+  const totalSteps = catalogItem ? catalogItem.pasos.length : 0;
+  if (totalSteps > 0 && t.stepsCompleted.length >= totalSteps) {
+    t.completado = true;
+    // Show confetti
+    setTimeout(() => {
+      const card = document.getElementById(`timeline-card-${tramiteIdx}`);
+      if (card) {
+        const burst = document.createElement('div');
+        burst.className = 'confetti-burst';
+        burst.textContent = '🎉';
+        card.appendChild(burst);
+        setTimeout(() => burst.remove(), 1000);
+      }
+    }, 100);
+    showToast('¡Trámite completado al 100%! 🎉');
+  }
+
+  localStorage.setItem('hagaclic_saved_tramites', JSON.stringify(AppState.savedTramites));
+  updateSavedBadgeCount();
+  renderSavedTramites();
+}
+
+function toggleCompleteSaved(idx) {
+  AppState.savedTramites[idx].completado = !AppState.savedTramites[idx].completado;
+  if (AppState.savedTramites[idx].completado) {
+    // Mark all steps as completed
+    const catalogItem = AppState.allTramites.find(x => x.id === AppState.savedTramites[idx].id);
+    if (catalogItem && catalogItem.pasos) {
+      AppState.savedTramites[idx].stepsCompleted = catalogItem.pasos.map((_, i) => i);
+    }
+  } else {
+    AppState.savedTramites[idx].stepsCompleted = [];
+  }
+  localStorage.setItem('hagaclic_saved_tramites', JSON.stringify(AppState.savedTramites));
+  updateSavedBadgeCount();
+  renderSavedTramites();
+}
+
+function deleteSavedTramite(idx) {
+  if (confirm('¿Deseas eliminar este trámite de tu lista guardada?')) {
+    AppState.savedTramites.splice(idx, 1);
+    localStorage.setItem('hagaclic_saved_tramites', JSON.stringify(AppState.savedTramites));
+    updateSavedBadgeCount();
+    renderSavedTramites();
+    showToast('Trámite eliminado de Mis Trámites');
+  }
+}
+
+// ============================================================================
+// 11. Calculadora de Plazos y Costes (Mejora 4)
+// ============================================================================
+let _calcDeadlineResult = null;
+
+function initCalculator() {
+  const tabs = document.querySelectorAll('.calc-tab');
+  const tramiteSelect = document.getElementById('calcTramiteSelect');
+  
+  // Set default date to today
+  const dateInput = document.getElementById('calcFechaInicio');
+  if (dateInput) dateInput.valueAsDate = new Date();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+      const target = tab.getAttribute('data-calc-tab');
+      document.getElementById(target === 'plazos' ? 'calcPanelPlazos' : 'calcPanelCostes').classList.add('active');
+    });
+  });
+
+  if (tramiteSelect) {
+    tramiteSelect.addEventListener('change', () => {
+      const isCustom = tramiteSelect.value === 'custom';
+      document.getElementById('calcCustomGroup').style.display = isCustom ? 'flex' : 'none';
+      document.getElementById('calcCustomTypeGroup').style.display = isCustom ? 'flex' : 'none';
+    });
+  }
+}
+
+const PLAZO_DATA = {
+  fianza: { dias: 30, tipo: 'naturales', nombre: 'Devolución de fianza' },
+  sucesiones: { dias: 183, tipo: 'naturales', nombre: 'Impuesto de Sucesiones' },
+  desempleo: { dias: 15, tipo: 'habiles', nombre: 'Solicitud prestación desempleo' },
+  consumo: { dias: 30, tipo: 'naturales', nombre: 'Respuesta reclamación consumo' },
+  dgt_transfer: { dias: 30, tipo: 'naturales', nombre: 'Transferencia vehículo DGT' },
+  baja_suministro: { dias: 2, tipo: 'habiles', nombre: 'Baja de suministro' },
+};
+
+// National holidays (approximate, for working-day calculation)
+const FESTIVOS_NACIONALES = [
+  '01-01', '01-06', '03-19', '05-01', '08-15', '10-12', '11-01', '12-06', '12-08', '12-25'
+];
+
+function isWeekend(date) {
+  const d = date.getDay();
+  return d === 0 || d === 6;
+}
+
+function isFestivo(date) {
+  const mmdd = String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+  return FESTIVOS_NACIONALES.includes(mmdd);
+}
+
+function addWorkingDays(startDate, days) {
+  let current = new Date(startDate);
+  let added = 0;
+  while (added < days) {
+    current.setDate(current.getDate() + 1);
+    if (!isWeekend(current) && !isFestivo(current)) {
+      added++;
+    }
+  }
+  return current;
+}
+
+function calculateDeadline() {
+  const tramiteType = document.getElementById('calcTramiteSelect').value;
+  const fechaStr = document.getElementById('calcFechaInicio').value;
+  
+  if (!fechaStr) {
+    showToast('Selecciona una fecha de inicio');
+    return;
+  }
+
+  const startDate = new Date(fechaStr);
+  let dias, tipo, nombre;
+
+  if (tramiteType === 'custom') {
+    dias = parseInt(document.getElementById('calcCustomDias').value) || 30;
+    tipo = document.getElementById('calcCustomTipo').value;
+    nombre = 'Plazo personalizado';
+  } else {
+    const data = PLAZO_DATA[tramiteType];
+    dias = data.dias;
+    tipo = data.tipo;
+    nombre = data.nombre;
+  }
+
+  let deadline;
+  if (tipo === 'habiles') {
+    deadline = addWorkingDays(startDate, dias);
+  } else {
+    deadline = new Date(startDate);
+    deadline.setDate(deadline.getDate() + dias);
+  }
+
+  const now = new Date();
+  const remainingMs = deadline - now;
+  const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+
+  _calcDeadlineResult = { deadline, nombre, dias, tipo };
+
+  const resultBox = document.getElementById('calcResultBox');
+  const resultDate = document.getElementById('calcResultDate');
+  const resultDays = document.getElementById('calcResultDays');
+
+  resultDate.textContent = deadline.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  
+  if (remainingDays > 0) {
+    resultDays.innerHTML = `<span style="color: var(--success);">Quedan <strong>${remainingDays} días</strong> desde hoy</span> (${dias} ${tipo === 'habiles' ? 'días hábiles' : 'días naturales'} desde el ${startDate.toLocaleDateString('es-ES')})`;
+  } else if (remainingDays === 0) {
+    resultDays.innerHTML = `<span style="color: var(--danger); font-weight: 800;">¡El plazo vence HOY!</span>`;
+  } else {
+    resultDays.innerHTML = `<span style="color: var(--danger); font-weight: 800;">¡Plazo vencido hace ${Math.abs(remainingDays)} días!</span>`;
+  }
+
+  resultBox.style.display = 'block';
+  resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function exportToCalendar() {
+  if (!_calcDeadlineResult) return;
+  const { deadline, nombre } = _calcDeadlineResult;
+  
+  const pad = (n) => String(n).padStart(2, '0');
+  const formatICSDate = (d) => {
+    return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
+  };
+
+  const start = new Date(deadline);
+  start.setHours(9, 0, 0);
+  const end = new Date(deadline);
+  end.setHours(10, 0, 0);
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//HagaClic//Calculadora//ES',
+    'BEGIN:VEVENT',
+    `DTSTART:${formatICSDate(start)}`,
+    `DTEND:${formatICSDate(end)}`,
+    `SUMMARY:⚠️ PLAZO: ${nombre}`,
+    `DESCRIPTION:Fecha límite para el trámite "${nombre}". Generado por HagaClic.`,
+    'BEGIN:VALARM',
+    'TRIGGER:-P1D',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:Mañana vence el plazo de: ${nombre}`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `plazo_${nombre.replace(/\s+/g, '_').toLowerCase()}.ics`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  showToast('¡Evento de calendario descargado!');
+}
+
+const COST_DATA = {
+  dni: {
+    nombre: 'Renovación del DNI',
+    items: [
+      { label: 'Tasa oficial DNI (modelo 790-012)', value: '12,00 €' },
+      { label: 'Fotografía carnet (fotomatotón)', value: '4,00 - 6,00 €' },
+      { label: 'Volante empadronamiento (si cambio domicilio)', value: 'Gratuito' },
+      { label: 'TOTAL ESTIMADO', value: '12,00 - 18,00 €' },
+    ]
+  },
+  pasaporte: {
+    nombre: 'Renovación del Pasaporte',
+    items: [
+      { label: 'Tasa oficial Pasaporte (modelo 790-012)', value: '30,00 €' },
+      { label: 'Fotografía carnet', value: '4,00 - 6,00 €' },
+      { label: 'TOTAL ESTIMADO', value: '34,00 - 36,00 €' },
+    ]
+  },
+  dgt_transfer: {
+    nombre: 'Transferencia de vehículo (DGT)',
+    items: [
+      { label: 'Tasa DGT 4.1 (turismos)', value: '55,70 €' },
+      { label: 'Impuesto Transmisiones Patrimoniales (ITP)', value: 'Variable según CC.AA. y valor' },
+      { label: 'Informe de vehículo DGT', value: '8,67 €' },
+      { label: 'Gestoría (opcional)', value: '60,00 - 120,00 €' },
+      { label: 'TOTAL ESTIMADO (sin gestor)', value: '64,37 € + ITP' },
+    ]
+  },
+  sucesiones: {
+    nombre: 'Herencia / Sucesiones',
+    items: [
+      { label: 'Certificado Defunción (Registro Civil)', value: 'Gratuito' },
+      { label: 'Certificado Últimas Voluntades (modelo 790-006)', value: '3,86 €' },
+      { label: 'Certificado Seguros (modelo 790-006)', value: '3,86 €' },
+      { label: 'Aranceles notariales (escritura herencia)', value: '300 - 1.500 € (según valor)' },
+      { label: 'Registro de la Propiedad (inmuebles)', value: 'Variable' },
+      { label: 'Impuesto Sucesiones (modelo 650)', value: 'Variable por CC.AA. y parentesco' },
+      { label: 'Plusvalía municipal (IIVTNU)', value: 'Variable según municipio' },
+      { label: 'TOTAL ESTIMADO', value: 'Desde 308 € + impuestos' },
+    ]
+  },
+  empadronamiento: {
+    nombre: 'Empadronamiento',
+    items: [
+      { label: 'Trámite de alta/cambio padrón', value: 'Gratuito' },
+      { label: 'Volante de empadronamiento', value: 'Gratuito' },
+      { label: 'TOTAL', value: 'Gratuito' },
+    ]
+  },
+  extranjeria_nie: {
+    nombre: 'Cita Extranjería (NIE / TIE)',
+    items: [
+      { label: 'Tasa modelo 790-012 (NIE)', value: '12,00 €' },
+      { label: 'Tasa modelo 790-052 (TIE tarjeta)', value: '16,32 €' },
+      { label: 'Fotografías carnet (3 unidades)', value: '6,00 - 9,00 €' },
+      { label: 'TOTAL ESTIMADO (NIE + TIE)', value: '28,32 - 37,32 €' },
+    ]
+  },
+};
+
+function calculateCosts() {
+  const type = document.getElementById('calcCosteTramite').value;
+  const data = COST_DATA[type];
+  if (!data) return;
+
+  const container = document.getElementById('costResultBox');
+  container.innerHTML = `
+    <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">💰 Desglose de costes: ${data.nombre}</h4>
+    ${data.items.map(item => `
+      <div class="cost-item">
+        <span class="cost-item-label">${item.label}</span>
+        <span class="cost-item-value">${item.value}</span>
+      </div>
+    `).join('')}
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 1rem; font-style: italic;">
+      * Tasas oficiales actualizadas a normativa vigente. Las tasas autonómicas y municipales pueden variar. Consulta siempre en la sede electrónica oficial.
+    </p>
+  `;
+  container.style.display = 'block';
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ============================================================================
+// 12. Chatbot Asistente Conversacional (Mejora 1)
+// ============================================================================
+let chatHistory = JSON.parse(localStorage.getItem('hagaclic_chat_history') || '[]');
+let chatOpen = false;
+
+function initChatbot() {
+  const fab = document.getElementById('chatbotFab');
+  const panel = document.getElementById('chatbotPanel');
+  const closeBtn = document.getElementById('chatbotClose');
+  const input = document.getElementById('chatbotInput');
+  const sendBtn = document.getElementById('chatbotSend');
+
+  fab.addEventListener('click', () => {
+    chatOpen = !chatOpen;
+    panel.style.display = chatOpen ? 'flex' : 'none';
+    if (chatOpen) {
+      if (chatHistory.length === 0) {
+        addBotMessage('¡Hola! 👋 Soy el asistente de HagaClic. Cuéntame con tus propias palabras qué trámite necesitas resolver y te orientaré al instante.\n\nPor ejemplo: \"me han subido el alquiler\", \"necesito renovar el DNI\", \"quiero darme de baja del gym\"...');
+      } else {
+        renderChatHistory();
+      }
+      input.focus();
+    }
+  });
+
+  closeBtn.addEventListener('click', () => {
+    chatOpen = false;
+    panel.style.display = 'none';
+  });
+
+  sendBtn.addEventListener('click', () => sendChatMessage());
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendChatMessage();
+  });
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatbotInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  addUserMessage(text);
+  showTypingIndicator();
+
+  // Simulate a brief delay for natural feel
+  setTimeout(() => {
+    removeTypingIndicator();
+    processUserQuery(text);
+  }, 600 + Math.random() * 400);
+}
+
+function addUserMessage(text) {
+  chatHistory.push({ role: 'user', text });
+  saveChatHistory();
+  appendMessageToDOM('user', text);
+}
+
+function addBotMessage(text, actions) {
+  chatHistory.push({ role: 'bot', text, actions });
+  saveChatHistory();
+  appendMessageToDOM('bot', text, actions);
+}
+
+function appendMessageToDOM(role, text, actions) {
+  const container = document.getElementById('chatbotMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  
+  let html = text.replace(/\n/g, '<br>');
+  
+  if (actions && actions.length > 0) {
+    html += '<div class="chat-action-btns">';
+    actions.forEach(a => {
+      html += `<button class="chat-action-btn" onclick="${a.onclick}">${a.label}</button>`;
+    });
+    html += '</div>';
+  }
+  
+  div.innerHTML = html;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTypingIndicator() {
+  const container = document.getElementById('chatbotMessages');
+  const typing = document.createElement('div');
+  typing.className = 'chat-typing';
+  typing.id = 'chatTyping';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  container.appendChild(typing);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const t = document.getElementById('chatTyping');
+  if (t) t.remove();
+}
+
+function renderChatHistory() {
+  const container = document.getElementById('chatbotMessages');
+  container.innerHTML = '';
+  chatHistory.forEach(msg => {
+    appendMessageToDOM(msg.role, msg.text, msg.actions);
+  });
+}
+
+function saveChatHistory() {
+  // Keep only last 30 messages
+  if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
+  localStorage.setItem('hagaclic_chat_history', JSON.stringify(chatHistory));
+}
+
+function processUserQuery(query) {
+  const normalizedQuery = query.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+
+  const tokens = normalizedQuery.split(' ').filter(t => t.length > 1);
+
+  // Search in catalog first
+  let bestMatch = null;
+  let bestScore = 0;
+
+  // Check INTENTS_MAP equivalent
+  const CHAT_INTENTS = {
+    'fianza': 'reclamar-fianza-casero', 'casero': 'reclamar-fianza-casero', 'alquiler': 'reclamar-fianza-casero',
+    'inquilino': 'reclamar-fianza-casero', 'arrendador': 'reclamar-fianza-casero',
+    'luz': 'baja-suministro', 'gas': 'baja-suministro', 'telefono': 'baja-suministro',
+    'fibra': 'baja-suministro', 'movistar': 'baja-suministro', 'vodafone': 'baja-suministro',
+    'orange': 'baja-suministro', 'endesa': 'baja-suministro', 'iberdrola': 'baja-suministro',
+    'naturgy': 'baja-suministro', 'suministro': 'baja-suministro',
+    'dni': 'renovar-dni', 'carnet': 'renovar-dni', 'identidad': 'renovar-dni',
+    'consumo': 'reclamar-compra-consumo', 'defectuoso': 'reclamar-compra-consumo',
+    'roto': 'reclamar-compra-consumo', 'garantia': 'reclamar-compra-consumo',
+    'padron': 'empadronarse', 'empadronar': 'empadronarse', 'empadronamiento': 'empadronarse',
+    'nie': 'cita-previa-extranjeria', 'tie': 'cita-previa-extranjeria',
+    'huellas': 'cita-previa-extranjeria', 'extranjeria': 'cita-previa-extranjeria',
+    'paro': 'prestacion-desempleo-sepe', 'desempleo': 'prestacion-desempleo-sepe',
+    'sepe': 'prestacion-desempleo-sepe', 'inem': 'prestacion-desempleo-sepe',
+    'gimnasio': 'cancelar-gimnasio', 'gym': 'cancelar-gimnasio',
+  };
+
+  for (const token of tokens) {
+    if (CHAT_INTENTS[token]) {
+      const match = AppState.allTramites.find(t => t.id === CHAT_INTENTS[token]);
+      if (match) {
+        bestMatch = match;
+        bestScore = 100;
+        break;
+      }
+    }
+  }
+
+  // If no exact intent match, search by title/keywords
+  if (!bestMatch) {
+    for (const tramite of AppState.allTramites) {
+      let score = 0;
+      const normTitle = tramite.titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normResumen = tramite.resumen.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      
+      for (const token of tokens) {
+        if (normTitle.includes(token)) score += 20;
+        if (normResumen.includes(token)) score += 10;
+        if (tramite.palabras_clave) {
+          for (const kw of tramite.palabras_clave) {
+            if (kw.includes(token) || token.includes(kw)) score += 15;
+          }
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = tramite;
+      }
+    }
+  }
+
+  if (bestMatch && bestScore >= 10) {
+    const response = `📌 He encontrado el trámite que necesitas:\n\n<strong>${bestMatch.titulo}</strong>\n${bestMatch.resumen}\n\n💰 <strong>Coste:</strong> ${bestMatch.coste}\n⏰ <strong>Plazo:</strong> ${bestMatch.plazo}\n📍 <strong>Dónde:</strong> ${bestMatch.donde}`;
+    
+    const actions = [
+      { label: '📖 Ver guía completa', onclick: `openTramiteDetail('${bestMatch.id}'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
+    ];
+    if (bestMatch.plantilla_carta) {
+      actions.push({ label: '📄 Generar carta PDF', onclick: `openGeneratorWithTemplate('${bestMatch.plantilla_carta}'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` });
+    }
+    actions.push({ label: '🔗 Web oficial', onclick: `window.open('${bestMatch.enlace_oficial}', '_blank')` });
+
+    addBotMessage(response, actions);
+  } else {
+    // Try the orientacion_service via API
+    fetch(`/api/orientacion?q=${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.titulo) {
+          const response = `🏛️ He encontrado orientación oficial para tu consulta:\n\n<strong>${data.titulo}</strong>\n${data.resumen}\n\n🏢 <strong>Organismo:</strong> ${data.organismo}\n⏰ <strong>Plazo:</strong> ${data.plazo}\n💰 <strong>Coste:</strong> ${data.coste}`;
+          
+          const actions = [
+            { label: '🔍 Ver guía completa', onclick: `document.getElementById('searchInput').value='${escapeHtml(query)}'; AppState.searchQuery='${escapeHtml(query)}'; performSearch(true); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false; switchView('catalog');` },
+            { label: '🔗 Web oficial', onclick: `window.open('${data.enlace_oficial}', '_blank')` },
+          ];
+          
+          addBotMessage(response, actions);
+        } else {
+          addBotMessage('🤔 No he encontrado un trámite exacto para esa consulta, pero puedo ayudarte de estas formas:', [
+            { label: '📝 Generar Instancia General', onclick: `openGeneratorWithTemplate('instancia_general'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
+            { label: '📚 Ver todos los trámites', onclick: `switchView('catalog'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
+          ]);
+        }
+      })
+      .catch(() => {
+        addBotMessage('🤔 No he encontrado un trámite exacto, pero puedo ayudarte:', [
+          { label: '📝 Generar Instancia General', onclick: `openGeneratorWithTemplate('instancia_general'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
+          { label: '📚 Ver todos los trámites', onclick: `switchView('catalog'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
+        ]);
+      });
+  }
 }
