@@ -1606,15 +1606,25 @@ function calculateCosts() {
 }
 
 // ============================================================================
-// 12. Chatbot Asistente Conversacional (Mejora 1)
+// 12. Chatbot Asistente Conversacional Inteligente Universal
 // ============================================================================
 let chatHistory = JSON.parse(localStorage.getItem('hagaclic_chat_history') || '[]');
 let chatOpen = false;
+
+const QUICK_SUGGESTIONS = [
+  "¿Cómo pedir el Ingreso Mínimo Vital?",
+  "Quiero recurrir una multa de la DGT",
+  "Alta de autónomos en Hacienda y Seg. Social",
+  "Baja por paternidad o maternidad",
+  "Nacionalidad española por residencia",
+  "El ayuntamiento no me contesta: ¿qué hacer?"
+];
 
 function initChatbot() {
   const fab = document.getElementById('chatbotFab');
   const panel = document.getElementById('chatbotPanel');
   const closeBtn = document.getElementById('chatbotClose');
+  const clearBtn = document.getElementById('chatbotClear');
   const input = document.getElementById('chatbotInput');
   const sendBtn = document.getElementById('chatbotSend');
 
@@ -1623,7 +1633,7 @@ function initChatbot() {
     panel.style.display = chatOpen ? 'flex' : 'none';
     if (chatOpen) {
       if (chatHistory.length === 0) {
-        addBotMessage('¡Hola! 👋 Soy el asistente de HagaClic. Cuéntame con tus propias palabras qué trámite necesitas resolver y te orientaré al instante.\n\nPor ejemplo: \"me han subido el alquiler\", \"necesito renovar el DNI\", \"quiero darme de baja del gym\"...');
+        showInitialWelcome();
       } else {
         renderChatHistory();
       }
@@ -1636,26 +1646,90 @@ function initChatbot() {
     panel.style.display = 'none';
   });
 
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      chatHistory = [];
+      localStorage.removeItem('hagaclic_chat_history');
+      showInitialWelcome();
+      showToast('Conversación reiniciada');
+    });
+  }
+
   sendBtn.addEventListener('click', () => sendChatMessage());
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendChatMessage();
   });
 }
 
-function sendChatMessage() {
+function showInitialWelcome() {
+  const container = document.getElementById('chatbotMessages');
+  container.innerHTML = '';
+  
+  const welcomeText = "¡Hola! 👋 Soy tu **Asistente de Trámites y Administración Pública de España**.\n\nPuedo orientarte sobre **cualquier trámite, ayuda, pensión, gestión de tráfico, extranjería, tributos o ayuntamientos**, aunque no esté en el catálogo predefinido.\n\nEscribe tu duda con tus propias palabras o elige una consulta habitual:";
+  appendMessageToDOM('bot', welcomeText);
+
+  // Render suggestion chips
+  const sugDiv = document.createElement('div');
+  sugDiv.className = 'chat-suggestions';
+  sugDiv.id = 'chatSuggestions';
+  sugDiv.innerHTML = `
+    <span class="chat-suggestions-title">💡 Preguntas habituales:</span>
+    <div class="chat-chips">
+      ${QUICK_SUGGESTIONS.map(s => `
+        <button type="button" class="chat-chip" onclick="askQuickSuggestion('${escapeHtml(s)}')">${escapeHtml(s)}</button>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(sugDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function askQuickSuggestion(text) {
+  const sug = document.getElementById('chatSuggestions');
+  if (sug) sug.remove();
+  sendChatMessage(text);
+}
+
+function sendChatMessage(presetText) {
   const input = document.getElementById('chatbotInput');
-  const text = input.value.trim();
+  const text = (presetText !== undefined ? presetText : input.value).trim();
   if (!text) return;
   input.value = '';
+
+  // Remove chips if present
+  const sug = document.getElementById('chatSuggestions');
+  if (sug) sug.remove();
 
   addUserMessage(text);
   showTypingIndicator();
 
-  // Simulate a brief delay for natural feel
-  setTimeout(() => {
-    removeTypingIndicator();
-    processUserQuery(text);
-  }, 600 + Math.random() * 400);
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: text,
+      history: chatHistory.slice(-8)
+    })
+  })
+    .then(r => {
+      if (!r.ok) throw new Error('Error en el servidor');
+      return r.json();
+    })
+    .then(data => {
+      removeTypingIndicator();
+      if (data && data.respuesta) {
+        addBotMessage(data.respuesta, data.acciones);
+      } else {
+        addBotMessage('He tenido un problema al procesar la respuesta. Por favor, reformula tu consulta o pulsa en Instancia General.');
+      }
+    })
+    .catch(err => {
+      removeTypingIndicator();
+      addBotMessage('⚠️ Hubo una dificultad temporal de conexión. Puedes formular una Instancia Oficial ante la administración o ver el catálogo:', [
+        { label: '📄 Redactar Instancia General', tipo: 'generar_pdf', template: 'instancia_general', titulo: 'Instancia General' },
+        { label: '📚 Ver Catálogo de Trámites', tipo: 'ir_catalogo' }
+      ]);
+    });
 }
 
 function addUserMessage(text) {
@@ -1670,24 +1744,123 @@ function addBotMessage(text, actions) {
   appendMessageToDOM('bot', text, actions);
 }
 
+function formatChatMarkdown(raw) {
+  if (!raw) return '';
+  // Escape HTML tags to prevent injection, preserving format
+  let text = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Headers: ### Title -> <h4>Title</h4>
+  text = text.replace(/^### (.*$)/gim, '<h4>$1</h4>');
+  text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+
+  // Bold: **text** -> <strong>text</strong>
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Bullet items: lines starting with • or -
+  text = text.replace(/^[•\-] (.*$)/gim, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
+  // Clean up nested adjacent uls
+  text = text.replace(/<\/ul>\s*<ul>/g, '');
+
+  // Numbered list items
+  text = text.replace(/^\d+\.\s+(.*$)/gim, '<li>$1</li>');
+
+  // Links: [Text](URL) -> <a href="URL" target="_blank">Text</a>
+  text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Line breaks
+  text = text.replace(/\n\n/g, '<br><br>');
+  text = text.replace(/\n/g, '<br>');
+
+  return text;
+}
+
 function appendMessageToDOM(role, text, actions) {
   const container = document.getElementById('chatbotMessages');
   const div = document.createElement('div');
   div.className = `chat-msg ${role}`;
   
-  let html = text.replace(/\n/g, '<br>');
-  
-  if (actions && actions.length > 0) {
-    html += '<div class="chat-action-btns">';
-    actions.forEach(a => {
-      html += `<button class="chat-action-btn" onclick="${a.onclick}">${a.label}</button>`;
-    });
-    html += '</div>';
+  if (role === 'bot') {
+    div.innerHTML = formatChatMarkdown(text);
+  } else {
+    div.textContent = text;
   }
   
-  div.innerHTML = html;
+  if (actions && actions.length > 0) {
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'chat-action-btns';
+    actions.forEach((a, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `chat-action-btn ${idx === 0 ? 'primary' : ''}`;
+      btn.textContent = a.label;
+      btn.onclick = () => handleChatAction(a);
+      actionContainer.appendChild(btn);
+    });
+    div.appendChild(actionContainer);
+  }
+  
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+}
+
+function handleChatAction(action) {
+  const panel = document.getElementById('chatbotPanel');
+  if (!action) return;
+
+  switch (action.tipo) {
+    case 'ver_tramite':
+      if (action.id) {
+        openTramiteDetail(action.id);
+        panel.style.display = 'none';
+        chatOpen = false;
+      }
+      break;
+
+    case 'generar_pdf':
+      openGeneratorWithTemplate(action.template || 'instancia_general');
+      panel.style.display = 'none';
+      chatOpen = false;
+      break;
+
+    case 'calculadora':
+      switchView('calculadora');
+      panel.style.display = 'none';
+      chatOpen = false;
+      if (action.dias) {
+        const dInput = document.getElementById('calcDias');
+        if (dInput) {
+          dInput.value = action.dias;
+          calculateDeadline();
+        }
+      }
+      break;
+
+    case 'link_externo':
+      if (action.url) {
+        window.open(action.url, '_blank', 'noopener,noreferrer');
+      }
+      break;
+
+    case 'ir_catalogo':
+      switchView('catalog');
+      panel.style.display = 'none';
+      chatOpen = false;
+      break;
+
+    default:
+      if (action.onclick) {
+        try {
+          eval(action.onclick);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      break;
+  }
 }
 
 function showTypingIndicator() {
@@ -1714,114 +1887,6 @@ function renderChatHistory() {
 }
 
 function saveChatHistory() {
-  // Keep only last 30 messages
   if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
   localStorage.setItem('hagaclic_chat_history', JSON.stringify(chatHistory));
-}
-
-function processUserQuery(query) {
-  const normalizedQuery = query.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ').trim();
-
-  const tokens = normalizedQuery.split(' ').filter(t => t.length > 1);
-
-  // Search in catalog first
-  let bestMatch = null;
-  let bestScore = 0;
-
-  // Check INTENTS_MAP equivalent
-  const CHAT_INTENTS = {
-    'fianza': 'reclamar-fianza-casero', 'casero': 'reclamar-fianza-casero', 'alquiler': 'reclamar-fianza-casero',
-    'inquilino': 'reclamar-fianza-casero', 'arrendador': 'reclamar-fianza-casero',
-    'luz': 'baja-suministro', 'gas': 'baja-suministro', 'telefono': 'baja-suministro',
-    'fibra': 'baja-suministro', 'movistar': 'baja-suministro', 'vodafone': 'baja-suministro',
-    'orange': 'baja-suministro', 'endesa': 'baja-suministro', 'iberdrola': 'baja-suministro',
-    'naturgy': 'baja-suministro', 'suministro': 'baja-suministro',
-    'dni': 'renovar-dni', 'carnet': 'renovar-dni', 'identidad': 'renovar-dni',
-    'consumo': 'reclamar-compra-consumo', 'defectuoso': 'reclamar-compra-consumo',
-    'roto': 'reclamar-compra-consumo', 'garantia': 'reclamar-compra-consumo',
-    'padron': 'empadronarse', 'empadronar': 'empadronarse', 'empadronamiento': 'empadronarse',
-    'nie': 'cita-previa-extranjeria', 'tie': 'cita-previa-extranjeria',
-    'huellas': 'cita-previa-extranjeria', 'extranjeria': 'cita-previa-extranjeria',
-    'paro': 'prestacion-desempleo-sepe', 'desempleo': 'prestacion-desempleo-sepe',
-    'sepe': 'prestacion-desempleo-sepe', 'inem': 'prestacion-desempleo-sepe',
-    'gimnasio': 'cancelar-gimnasio', 'gym': 'cancelar-gimnasio',
-  };
-
-  for (const token of tokens) {
-    if (CHAT_INTENTS[token]) {
-      const match = AppState.allTramites.find(t => t.id === CHAT_INTENTS[token]);
-      if (match) {
-        bestMatch = match;
-        bestScore = 100;
-        break;
-      }
-    }
-  }
-
-  // If no exact intent match, search by title/keywords
-  if (!bestMatch) {
-    for (const tramite of AppState.allTramites) {
-      let score = 0;
-      const normTitle = tramite.titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const normResumen = tramite.resumen.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      
-      for (const token of tokens) {
-        if (normTitle.includes(token)) score += 20;
-        if (normResumen.includes(token)) score += 10;
-        if (tramite.palabras_clave) {
-          for (const kw of tramite.palabras_clave) {
-            if (kw.includes(token) || token.includes(kw)) score += 15;
-          }
-        }
-      }
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = tramite;
-      }
-    }
-  }
-
-  if (bestMatch && bestScore >= 10) {
-    const response = `📌 He encontrado el trámite que necesitas:\n\n<strong>${bestMatch.titulo}</strong>\n${bestMatch.resumen}\n\n💰 <strong>Coste:</strong> ${bestMatch.coste}\n⏰ <strong>Plazo:</strong> ${bestMatch.plazo}\n📍 <strong>Dónde:</strong> ${bestMatch.donde}`;
-    
-    const actions = [
-      { label: '📖 Ver guía completa', onclick: `openTramiteDetail('${bestMatch.id}'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
-    ];
-    if (bestMatch.plantilla_carta) {
-      actions.push({ label: '📄 Generar carta PDF', onclick: `openGeneratorWithTemplate('${bestMatch.plantilla_carta}'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` });
-    }
-    actions.push({ label: '🔗 Web oficial', onclick: `window.open('${bestMatch.enlace_oficial}', '_blank')` });
-
-    addBotMessage(response, actions);
-  } else {
-    // Try the orientacion_service via API
-    fetch(`/api/orientacion?q=${encodeURIComponent(query)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.titulo) {
-          const response = `🏛️ He encontrado orientación oficial para tu consulta:\n\n<strong>${data.titulo}</strong>\n${data.resumen}\n\n🏢 <strong>Organismo:</strong> ${data.organismo}\n⏰ <strong>Plazo:</strong> ${data.plazo}\n💰 <strong>Coste:</strong> ${data.coste}`;
-          
-          const actions = [
-            { label: '🔍 Ver guía completa', onclick: `document.getElementById('searchInput').value='${escapeHtml(query)}'; AppState.searchQuery='${escapeHtml(query)}'; performSearch(true); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false; switchView('catalog');` },
-            { label: '🔗 Web oficial', onclick: `window.open('${data.enlace_oficial}', '_blank')` },
-          ];
-          
-          addBotMessage(response, actions);
-        } else {
-          addBotMessage('🤔 No he encontrado un trámite exacto para esa consulta, pero puedo ayudarte de estas formas:', [
-            { label: '📝 Generar Instancia General', onclick: `openGeneratorWithTemplate('instancia_general'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
-            { label: '📚 Ver todos los trámites', onclick: `switchView('catalog'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
-          ]);
-        }
-      })
-      .catch(() => {
-        addBotMessage('🤔 No he encontrado un trámite exacto, pero puedo ayudarte:', [
-          { label: '📝 Generar Instancia General', onclick: `openGeneratorWithTemplate('instancia_general'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
-          { label: '📚 Ver todos los trámites', onclick: `switchView('catalog'); document.getElementById('chatbotPanel').style.display='none'; chatOpen=false;` },
-        ]);
-      });
-  }
 }

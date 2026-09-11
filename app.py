@@ -5,6 +5,7 @@ import unicodedata
 from flask import Flask, render_template, request, jsonify, send_file
 from pdf_generator import build_pdf_buffer
 import orientacion_service
+import asistente_service
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -220,6 +221,19 @@ def api_orientacion():
     if orientacion:
         return jsonify(orientacion)
     return jsonify({'error': 'No se especificó consulta'}), 400
+
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    payload = request.get_json(silent=True) or {}
+    message = payload.get('message', '').strip()
+    history = payload.get('history', [])
+    
+    if not message:
+        return jsonify({'error': 'Mensaje vacío'}), 400
+        
+    all_tramites = load_tramites()
+    resultado = asistente_service.generar_respuesta_asistente(message, history, all_tramites)
+    return jsonify(resultado)
 
 @app.route('/api/tramite/<tramite_id>')
 def api_tramite_detail(tramite_id):
