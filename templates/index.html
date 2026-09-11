@@ -12,22 +12,22 @@
   <!-- Barra Superior de Accesibilidad y Aviso -->
   <header class="header-top">
     <div class="header-top-content">
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <span style="background: rgba(255,255,255,0.2); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">ESPAÑA</span>
-        <span>Asistente ciudadano oficial y accesible para gestiones y papeleos</span>
+      <div class="header-top-brand">
+        <span class="es-badge">ESPAÑA</span>
+        <span class="header-top-tagline">Asistente ciudadano oficial y accesible para gestiones y papeleos</span>
       </div>
       <div class="accessibility-controls">
         <button id="btnToggleFont" class="btn-access" title="Aumentar o reducir tamaño del texto">
           <span style="font-size: 1rem; font-weight: 800;">A+</span>
-          <span>Letra Grande</span>
+          <span class="btn-access-text">Letra Grande</span>
         </button>
         <button id="btnToggleContrast" class="btn-access" title="Activar modo de alto contraste para facilitar la lectura">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 0 1 0-16z"/></svg>
-          <span>Alto Contraste</span>
+          <span class="btn-access-text">Alto Contraste</span>
         </button>
         <button id="btnToggleDark" class="btn-access" title="Alternar modo oscuro/claro">
           <span id="darkModeIcon" style="font-size: 1rem;">🌙</span>
-          <span id="darkModeLabel">Modo Oscuro</span>
+          <span id="darkModeLabel" class="btn-access-text">Modo Oscuro</span>
         </button>
       </div>
     </div>
@@ -454,6 +454,35 @@
       </button>
     </div>
   </div>
+
+  <!-- Barra de Navegación Inferior para Móviles (Bottom App Bar) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navegación Móvil">
+    <button type="button" class="mobile-nav-btn active" data-target="catalog" onclick="switchView('catalog')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Catálogo</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-target="generator" onclick="switchView('generator')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+      <span>Cartas PDF</span>
+    </button>
+    <button type="button" class="mobile-nav-btn mobile-nav-center" onclick="toggleChatbotFromNav()" title="Abrir Asistente Virtual">
+      <div class="center-fab-bubble">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </div>
+      <span>Asistente</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-target="saved" onclick="switchView('saved')">
+      <div style="position: relative; display: inline-flex;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+        <span class="mobile-badge-count" id="mobileSavedCountBadge" style="display:none;">0</span>
+      </div>
+      <span>Mis Trámites</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-target="calculator" onclick="switchView('calculator')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="10" y2="10"></line><line x1="14" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="10" y2="14"></line><line x1="14" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="16" y2="18"></line></svg>
+      <span>Calculadora</span>
+    </button>
+  </nav>
 
   <script src="{{ url_for('static', filename='js/app.js') }}?v=2.0"></script>
 </body>

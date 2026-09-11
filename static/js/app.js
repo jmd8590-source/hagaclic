@@ -117,27 +117,31 @@ function switchView(viewName) {
   document.getElementById('viewSaved').style.display = 'none';
   document.getElementById('viewCalculator').style.display = 'none';
 
-  // Desmarcar botones activos de navegación
+  // Desmarcar botones activos de navegación (escritorio y móvil)
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+
+  function activateNavButtons(name) {
+    const btn = document.querySelector(`.nav-btn[data-target="${name}"]`);
+    if (btn) btn.classList.add('active');
+    const mobileBtn = document.querySelector(`.mobile-nav-btn[data-target="${name}"]`);
+    if (mobileBtn) mobileBtn.classList.add('active');
+  }
 
   if (viewName === 'catalog') {
     if (heroSection) heroSection.style.display = 'block';
     document.getElementById('viewCatalog').style.display = 'block';
-    const btn = document.querySelector('.nav-btn[data-target="catalog"]');
-    if (btn) btn.classList.add('active');
+    activateNavButtons('catalog');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (viewName === 'generator') {
-    // Al entrar al generador ocultamos el buscador grande para que el formulario se vea de inmediato
     if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewGenerator').style.display = 'block';
-    const btn = document.querySelector('.nav-btn[data-target="generator"]');
-    if (btn) btn.classList.add('active');
+    activateNavButtons('generator');
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (viewName === 'saved') {
     if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewSaved').style.display = 'block';
-    const btn = document.querySelector('.nav-btn[data-target="saved"]');
-    if (btn) btn.classList.add('active');
+    activateNavButtons('saved');
     renderSavedTramites();
     window.scrollTo({ top: 0, behavior: 'instant' });
   } else if (viewName === 'detail') {
@@ -147,8 +151,7 @@ function switchView(viewName) {
   } else if (viewName === 'calculator') {
     if (heroSection) heroSection.style.display = 'none';
     document.getElementById('viewCalculator').style.display = 'block';
-    const btn = document.querySelector('.nav-btn[data-target="calculator"]');
-    if (btn) btn.classList.add('active');
+    activateNavButtons('calculator');
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 }
@@ -331,7 +334,7 @@ function renderTramitesGrid(tramites, orientacionAsistida) {
   }
 
   grid.innerHTML = assistedHtml + tramites.map(t => `
-    <article class="tramite-card" id="card-${t.id}">
+    <article class="tramite-card" id="card-${t.id}" onclick="openTramiteDetail('${t.id}')">
       <div class="tramite-card-top">
         <span class="card-category-badge">${t.categoria}</span>
         <h3 class="tramite-card-title">${t.titulo}</h3>
@@ -359,7 +362,7 @@ function renderTramitesGrid(tramites, orientacionAsistida) {
           <span>Ver guía paso a paso</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </button>
-        <button class="btn-card-secondary" title="Guardar trámite" onclick="quickSaveTramite('${t.id}')">
+        <button class="btn-card-secondary" title="Guardar trámite" onclick="event.stopPropagation(); quickSaveTramite('${t.id}')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
         </button>
       </div>
@@ -600,8 +603,8 @@ function renderTramiteDetail(t) {
         ${t.documentos.map((doc, idx) => {
           const isChecked = checkedForThis.includes(idx);
           return `
-            <label class="checklist-item ${isChecked ? 'checked' : ''}" onclick="toggleDocCheck('${t.id}', ${idx}, this, event)">
-              <input type="checkbox" ${isChecked ? 'checked' : ''} />
+            <label class="checklist-item ${isChecked ? 'checked' : ''}">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="handleDocCheckChange('${t.id}', ${idx}, this)" />
               <span class="checklist-text">${doc}</span>
             </label>
           `;
@@ -639,7 +642,7 @@ function renderTramiteDetail(t) {
         <span>Compartir</span>
       </button>
 
-      <a href="${t.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn-action-secondary" style="margin-left: auto;">
+      <a href="${t.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn-action-secondary">
         <span>Ir a la web oficial (${t.enlace_texto})</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
       </a>
@@ -649,15 +652,9 @@ function renderTramiteDetail(t) {
   updateDocProgressCounter(t.id, t.documentos.length);
 }
 
-function toggleDocCheck(tramiteId, docIndex, labelElement, event) {
-  // Evitar doble trigger si el clic fue directamente en el input
-  if (event.target.tagName !== 'INPUT') {
-    const cb = labelElement.querySelector('input[type="checkbox"]');
-    cb.checked = !cb.checked;
-  }
-
-  const checkbox = labelElement.querySelector('input[type="checkbox"]');
-  labelElement.classList.toggle('checked', checkbox.checked);
+function handleDocCheckChange(tramiteId, docIndex, checkbox) {
+  const label = checkbox.closest('.checklist-item');
+  if (label) label.classList.toggle('checked', checkbox.checked);
 
   let checkedArr = AppState.checkedDocs[tramiteId] || [];
   if (checkbox.checked) {
@@ -933,9 +930,14 @@ function saveTramiteToStorage(id, titulo, daysDeadline, notes) {
 function updateSavedBadgeCount() {
   const count = AppState.savedTramites.filter(x => !x.completado).length;
   const badge = document.getElementById('savedCountBadge');
+  const mobileBadge = document.getElementById('mobileSavedCountBadge');
   if (badge) {
     badge.textContent = count;
     badge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+  if (mobileBadge) {
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = count > 0 ? 'flex' : 'none';
   }
 }
 
@@ -1620,6 +1622,22 @@ const QUICK_SUGGESTIONS = [
   "El ayuntamiento no me contesta: ¿qué hacer?"
 ];
 
+function toggleChatbotFromNav() {
+  const panel = document.getElementById('chatbotPanel');
+  if (!panel) return;
+  chatOpen = !chatOpen;
+  panel.style.display = chatOpen ? 'flex' : 'none';
+  if (chatOpen) {
+    if (chatHistory.length === 0) {
+      showInitialWelcome();
+    } else {
+      renderChatHistory();
+    }
+    const input = document.getElementById('chatbotInput');
+    if (input) setTimeout(() => input.focus(), 150);
+  }
+}
+
 function initChatbot() {
   const fab = document.getElementById('chatbotFab');
   const panel = document.getElementById('chatbotPanel');
@@ -1628,18 +1646,20 @@ function initChatbot() {
   const input = document.getElementById('chatbotInput');
   const sendBtn = document.getElementById('chatbotSend');
 
-  fab.addEventListener('click', () => {
-    chatOpen = !chatOpen;
-    panel.style.display = chatOpen ? 'flex' : 'none';
-    if (chatOpen) {
-      if (chatHistory.length === 0) {
-        showInitialWelcome();
-      } else {
-        renderChatHistory();
+  if (fab) {
+    fab.addEventListener('click', () => {
+      chatOpen = !chatOpen;
+      panel.style.display = chatOpen ? 'flex' : 'none';
+      if (chatOpen) {
+        if (chatHistory.length === 0) {
+          showInitialWelcome();
+        } else {
+          renderChatHistory();
+        }
+        input.focus();
       }
-      input.focus();
-    }
-  });
+    });
+  }
 
   closeBtn.addEventListener('click', () => {
     chatOpen = false;
