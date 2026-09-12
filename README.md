@@ -62,11 +62,11 @@
 
 ## 🚀 Cómo Arrancar la Aplicación
 
-### Método 1: Con 1 solo clic (Para Windows)
+### Método 1: Con 1 solo clic (Para Windows - Modo Completo)
 1. Haz doble clic en el archivo **`run.bat`**.
 2. Se iniciará el servidor y se abrirá automáticamente tu navegador en **`http://localhost:5000`**.
 
-### Método 2: Desde la terminal o consola
+### Método 2: Desde la terminal o consola (Python Flask)
 1. Clona o descarga este repositorio:
    ```bash
    git clone https://github.com/jmd8590-source/hagaclic.git
@@ -82,6 +82,14 @@
    ```
 4. Abre tu navegador web y entra en:
    **`http://localhost:5000`**
+
+### Método 3: Despliegue en la Web (Cloudflare Pages / GitHub Pages / Vercel)
+El repositorio incluye un archivo **`index.html`** autónomo en la raíz con todos los datos y estilos integrados:
+- **Cloudflare Pages / GitHub Pages**: Simplemente conecta este repositorio en tu panel de Cloudflare o GitHub Pages y selecciona la raíz `/` como directorio de salida (output directory). No requiere ningún comando de build.
+- Para regenerar el archivo estático si modificas los trámites o el CSS/JS:
+  ```bash
+  python build_static.py
+  ```
 
 ---
 
