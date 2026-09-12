@@ -725,6 +725,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .filter-btn {
@@ -753,7 +754,7 @@ body {
 /* Grid de Trámites */
 .tramites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
@@ -1410,6 +1411,8 @@ body {
   align-items: center;
   gap: 0.6rem;
   animation: slideInUp 0.3s ease-out;
+  max-width: calc(100vw - 2rem);
+  word-break: break-word;
 }
 
 @keyframes slideInUp {
@@ -2373,10 +2376,266 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Protección global contra desbordamiento de imágenes y vídeos */
+img, video, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+/* Los SVGs en línea mantienen sus dimensiones declaradas por atributo */
+svg {
+  max-width: 100%;
+}
+
 /* Ocultar barra inferior en pantallas de escritorio */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .mobile-bottom-nav {
     display: none !important;
+  }
+}
+
+/* ==========================================================================
+   TABLETS GRANDES Y LAPTOPS PEQUEÑOS (1025px - 1199px)
+   ========================================================================== */
+@media (min-width: 1025px) and (max-width: 1199px) {
+  .navbar-container {
+    padding: 0.85rem 1.25rem;
+  }
+  .main-container {
+    padding: 1.75rem 1.25rem;
+  }
+  .tramites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .hero-section {
+    padding: 2.2rem 1.25rem 1.8rem;
+  }
+}
+
+/* ==========================================================================
+   TABLETS (769px - 1024px) — Horizontal y Vertical
+   ========================================================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  body {
+    padding-bottom: 74px;
+  }
+
+  /* Mostrar barra inferior también en tablets */
+  .mobile-bottom-nav {
+    display: flex !important;
+    height: 64px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 3500;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    backdrop-filter: blur(16px);
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 4px 0;
+    touch-action: manipulation;
+  }
+
+  .mobile-nav-btn.active {
+    color: var(--primary);
+  }
+
+  .mobile-nav-btn.active svg {
+    transform: scale(1.12);
+    color: var(--primary);
+  }
+
+  .mobile-nav-center {
+    position: relative;
+    top: -10px;
+  }
+
+  .center-fab-bubble {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.4);
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-badge-count {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ocultar navegación superior en tablets (usa barra inferior) */
+  .nav-links {
+    display: none !important;
+  }
+
+  /* Header y navbar */
+  .header-top {
+    padding: 0.4rem 1rem;
+  }
+  .header-top-tagline {
+    display: none !important;
+  }
+  .btn-access-text {
+    display: none !important;
+  }
+  .navbar-container {
+    padding: 0.75rem 1rem;
+  }
+  .brand-text span {
+    display: none !important;
+  }
+
+  /* Hero section */
+  .hero-section {
+    padding: 2rem 1.25rem 1.75rem;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  .search-box-wrapper {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Main container */
+  .main-container {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Catalog header */
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .filter-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+    width: 100%;
+  }
+  .filter-pills::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Grid de trámites — 2 columnas en tablets */
+  .tramites-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* Detail view */
+  .detail-title {
+    font-size: 1.65rem;
+  }
+  .detail-summary-pills {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .detail-action-bar {
+    flex-wrap: wrap;
+  }
+  .detail-action-bar button,
+  .detail-action-bar a {
+    flex: 1 1 200px;
+  }
+
+  /* Generator */
+  .generator-section {
+    padding: 1.75rem 1.25rem;
+  }
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Saved section */
+  .saved-section {
+    padding: 1.75rem 1.25rem;
+  }
+  .saved-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  /* Calculator */
+  .calculator-section {
+    padding: 1.75rem 1.25rem;
+  }
+  .calc-tabs {
+    flex-direction: row;
+  }
+
+  /* Timeline cards */
+  .timeline-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  /* Chatbot — panel lateral en tablets */
+  .chatbot-fab {
+    display: none !important;
+  }
+  .chatbot-panel {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    z-index: 5000;
+  }
+
+  /* Toast — por encima de barra inferior */
+  .toast-msg {
+    bottom: 84px;
+    right: 16px;
   }
 }
 
@@ -2386,6 +2645,14 @@ html, body {
 @media (max-width: 768px) {
   body {
     padding-bottom: 78px; /* Espacio de reserva para que la barra inferior nunca tape botones */
+  }
+
+  /* Toast — por encima de barra inferior en móvil */
+  .toast-msg {
+    bottom: 84px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
   }
 
   /* 1. Barra superior de accesibilidad ultra-compacta */
@@ -2599,6 +2866,26 @@ html, body {
     font-size: 0.82rem;
   }
 
+  /* Filter pills en móvil: scroll horizontal */
+  .filter-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+    width: 100%;
+  }
+  .filter-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Catalog header en móvil: stack vertical */
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
   /* 6. Cuadrícula de trámites y tarjetas táctiles */
   .tramites-grid {
     grid-template-columns: 1fr;
@@ -2686,6 +2973,10 @@ html, body {
   }
 
   /* 8. Generador de Cartas PDF en Móvil */
+  .generator-section {
+    padding: 1.25rem 1rem;
+    margin-bottom: 2rem;
+  }
   .generator-card {
     padding: 1.25rem 1rem;
     margin-bottom: 2rem;
@@ -2699,6 +2990,28 @@ html, body {
     width: 100%;
     justify-content: center;
     min-height: 44px;
+  }
+  /* Encabezado del generador con inline styles — anular con flex-direction column */
+  #viewGenerator > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  #viewGenerator > div:first-child > div {
+    min-width: 0;
+  }
+  #viewGenerator > div:first-child > button {
+    width: 100% !important;
+    justify-content: center;
+  }
+  /* Botón submit del generador */
+  #viewGenerator div[style*="text-align: right"] {
+    text-align: center !important;
+  }
+  #btnSubmitPdf {
+    width: 100% !important;
+    justify-content: center;
+    min-height: 50px;
+    font-size: 1rem;
   }
   .form-grid {
     grid-template-columns: 1fr;
@@ -2747,10 +3060,28 @@ html, body {
   }
 
   /* 10. Mis Trámites (Timeline) en Móvil */
+  .saved-section {
+    padding: 1.25rem 1rem;
+    margin-bottom: 2rem;
+  }
+  /* Encabezado de Mis Trámites con inline styles */
+  #viewSaved > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  #viewSaved > div:first-child > button {
+    width: 100% !important;
+    justify-content: center;
+    min-height: 44px;
+  }
   .saved-header {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
+  }
+  .saved-card {
+    flex-direction: column;
+    align-items: stretch;
   }
   .saved-item-card {
     padding: 1.25rem 1rem;
