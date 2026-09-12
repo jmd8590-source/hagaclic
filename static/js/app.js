@@ -231,6 +231,13 @@ function executeSearchAndScroll() {
 }
 
 function loadInitialTramites() {
+  // Modo estático: datos embebidos por build_static.py (Cloudflare Pages)
+  if (window.__TRAMITES_DATA__) {
+    AppState.allTramites = window.__TRAMITES_DATA__;
+    renderTramitesGrid(AppState.allTramites);
+    return;
+  }
+  // Modo servidor: llamada a la API Flask local
   fetch('/api/tramites')
     .then(res => res.json())
     .then(data => {
@@ -244,6 +251,29 @@ function loadInitialTramites() {
 }
 
 function performSearch(shouldScroll = false, callback = null) {
+  // Modo estático: búsqueda y filtrado en cliente (sin API Flask)
+  if (window.__TRAMITES_DATA__) {
+    const q = AppState.searchQuery.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cat = AppState.currentCategory;
+    let results = AppState.allTramites.filter(t => {
+      const inCat = !cat || cat === 'todas' || t.categoria === cat;
+      if (!q) return inCat;
+      const haystack = [t.titulo, t.resumen, ...(t.palabras_clave || [])]
+        .join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return inCat && haystack.includes(q);
+    });
+    renderTramitesGrid(results, null);
+    if (callback) callback();
+    if (shouldScroll) {
+      const headerElem = document.getElementById('catalogHeader');
+      if (headerElem) {
+        const y = headerElem.getBoundingClientRect().top + window.pageYOffset - 75;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+    return;
+  }
+  // Modo servidor: búsqueda vía API Flask
   const url = `/api/tramites?q=${encodeURIComponent(AppState.searchQuery)}&categoria=${encodeURIComponent(AppState.currentCategory)}`;
   
   fetch(url)
@@ -1722,6 +1752,24 @@ function sendChatMessage(presetText) {
 
   addUserMessage(text);
   showTypingIndicator();
+
+  // Modo estático: el chatbot IA requiere el servidor Python (no disponible en Cloudflare Pages)
+  if (window.__TRAMITES_DATA__) {
+    removeTypingIndicator();
+    addBotMessage(
+      '🤖 El asistente conversacional con IA requiere el **servidor Python local** (ejecuta `run.bat` en tu PC).\n\n' +
+      'En la versión online puedes:\n' +
+      '- Explorar el **catálogo de trámites** y ver guías paso a paso\n' +
+      '- Usar la **calculadora de plazos** y costes\n' +
+      '- Generar **cartas PDF** (también requiere servidor local)\n\n' +
+      '¿Quieres ver el catálogo de trámites disponibles?',
+      [
+        { label: '📚 Ver Catálogo de Trámites', tipo: 'ir_catalogo' },
+        { label: '📅 Calculadora de Plazos', tipo: 'ir_calculadora' }
+      ]
+    );
+    return;
+  }
 
   fetch('/api/chat', {
     method: 'POST',
