@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HagaClic - Asistente de Trámites Administrativos de España</title>
   <meta name="description" content="Guías paso a paso sencillas, documentos necesarios, plazos legales y generador de cartas oficiales en PDF para trámites en España.">
+  {% if inline_css %}
+  <style>{{ inline_css | safe }}</style>
+  {% else %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.0">
+  {% endif %}
 </head>
 <body>
 
@@ -484,6 +488,10 @@
     </button>
   </nav>
 
+  {% if inline_js %}
+  <script>{{ inline_js | safe }}</script>
+  {% else %}
   <script src="{{ url_for('static', filename='js/app.js') }}?v=3.0"></script>
+  {% endif %}
 </body>
 </html>

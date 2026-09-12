@@ -190,7 +190,22 @@ def search_tramites(query="", categoria=None):
 def index():
     tramites = load_tramites()
     categorias = sorted(list(set(t['categoria'] for t in tramites)))
-    return render_template('index.html', tramites=tramites, categorias=categorias)
+    
+    # Leer CSS y JS para incluirlos inline (necesario para despliegues sin servidor de estáticos)
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    try:
+        with open(os.path.join(static_dir, 'css', 'style.css'), 'r', encoding='utf-8') as f:
+            inline_css = f.read()
+    except Exception:
+        inline_css = ''
+    try:
+        with open(os.path.join(static_dir, 'js', 'app.js'), 'r', encoding='utf-8') as f:
+            inline_js = f.read()
+    except Exception:
+        inline_js = ''
+    
+    return render_template('index.html', tramites=tramites, categorias=categorias,
+                           inline_css=inline_css, inline_js=inline_js)
 
 @app.route('/api/tramites')
 def api_tramites():
